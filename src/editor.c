@@ -56,7 +56,7 @@ editor_draw_rows(struct buffer* buffer)
 	{
 	    char welcome[80];
 	    int welcomelen = snprintf(welcome, sizeof(welcome),
-				      "BAZAAR version --version %s", BAZAAR_VERSION);
+				      "4me version --version %s", FORME_VERSION);
 	    if (welcomelen > e.screencols)
 	    {
 		welcomelen = e.screencols;

@@ -10,7 +10,7 @@
 #include <sys/ioctl.h>
 #include <string.h>
 
-#define BAZAAR_VERSION "0.0.1"
+#define FORME_VERSION "0.0.1"
 #define CTRL_KEY(k) ((k) & 0x1f)
 
 #endif /* COMMON_H */
