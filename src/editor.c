@@ -1,7 +1,5 @@
 #include "editor.h"
 
-extern struct term_config e;
-
 enum editor_keys
 {
     ARROW_LEFT = 1000,
@@ -56,7 +54,7 @@ editor_draw_rows(struct buffer* buffer)
 	{
 	    char welcome[80];
 	    int welcomelen = snprintf(welcome, sizeof(welcome),
-				      "4me version --version %s", FORME_VERSION);
+				      "4me version %s", FORME_VERSION);
 	    if (welcomelen > e.screencols)
 	    {
 		welcomelen = e.screencols;
@@ -68,10 +66,12 @@ editor_draw_rows(struct buffer* buffer)
 	        buffer_append(buffer, "~", 1);
 		padding--;
 	    }
+
 	    while (padding--)
 	    {
 		buffer_append(buffer, " ", 1);
 	    }
+
 	    buffer_append(buffer, welcome, welcomelen);
 	} else {
 	    buffer_append(buffer, "~", 1);	    
@@ -91,7 +91,7 @@ editor_init()
     e.cy = 0;
     if (term_get_window_size(&e.screenrows, &e.screencols) == -1)
     {
-	term_die("getwindowsize");
+        die("getwindowsize");
     }
 }
 
@@ -123,7 +123,7 @@ editor_read_key()
     {
 	if (nread == -1 && errno != EAGAIN)
 	{
-	    term_die("read");
+	    die("read");
 	}
     }
 
@@ -200,14 +200,12 @@ editor_read_key()
 		return END_KEY;
 	    }
 	}
-
 	return '\x1b';
     }
     else
     {
 	return c;	
-    }
-    
+    }    
 }
 
 void

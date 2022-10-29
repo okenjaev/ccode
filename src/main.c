@@ -11,5 +11,6 @@ int main(int argc, char *argv[])
 	editor_refresh_screen();
 	editor_process_keys();
     }
+
     return 0;
 }

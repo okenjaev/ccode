@@ -4,6 +4,9 @@
 #include "common.h"
 #include "buffer.h"
 #include "sys.h"
+#include "term.h"
+
+extern struct term_config e;
 
 void
 editor_init();
