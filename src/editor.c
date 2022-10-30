@@ -228,7 +228,7 @@ editor_draw_rows(const struct buffer* buffer, struct renderb* renderb)
     }
 }
 
-struct buffer current_buffer;
+struct buffer current_buffer = BUFFER_INIT;
 
 void
 editor_set_status_message(const char* fmt, ...)
@@ -276,9 +276,6 @@ void
 editor_init()
 {
     enable_raw_mode();
-
-    buffer_init(&current_buffer);
-    
     get_window_size();
 
     config.screenrows -= 2;
@@ -406,11 +403,7 @@ editor_process_keys()
     switch(c)
     {
     case CTRL_KEY('q'):
-	struct renderb renderb = RENDERB_INIT;
-	renderb_append(&renderb, "\x1b[2J", 4);
-        renderb_append(&renderb, "\x1b[H", 3);
-	renderb_flush(&renderb);
-	renderb_free(&renderb);
+	restore();
 	exit(0);
 	break;
     case ARROW_UP:

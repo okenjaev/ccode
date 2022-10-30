@@ -12,11 +12,8 @@ struct config {
 void
 die(const char* s);
 
-int
+void
 get_window_size();
-
-/* int */
-/* get_cursor_position(int *rows, int *cols); */
 
 void
 disable_raw_mode();
@@ -24,5 +21,7 @@ disable_raw_mode();
 void
 enable_raw_mode();
 
+void
+restore();
 
 #endif /* SYS_H */

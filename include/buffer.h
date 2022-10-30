@@ -25,8 +25,16 @@ struct buffer
     struct buffer_row *row;
 };
 
-void
-buffer_init(struct buffer* config);
+#define BUFFER_INIT {.cx = 0, \
+	    .cy = 0, \
+	    .rx = 0, \
+	    .num_rows = 0,\
+	    .rowoff = 0, \
+	    .coloff= 0, \
+	    .file_name = NULL, \
+	    .status_message_time = 0,\
+	    .status_message = {'\0'}, \
+	    .row = NULL}
 
 void
 buffer_append_row(struct buffer* buffer, char* string, int len);

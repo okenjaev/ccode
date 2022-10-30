@@ -17,7 +17,7 @@ renderb_free(struct renderb *renderb);
 void
 renderb_append(struct renderb *renderb, const char* s, int len);
 
-void
+int
 renderb_flush(const struct renderb* renderb);
 
 #endif /* RENDERB_H */

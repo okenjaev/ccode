@@ -1,8 +1,10 @@
 #include "sys.h"
+#include "renderb.h"
 
 struct config config;
 
-int
+static
+void
 get_cursor_position(int *rows, int *cols)
 {
     char buf[32];
@@ -10,7 +12,7 @@ get_cursor_position(int *rows, int *cols)
 
     if (write(STDOUT_FILENO, "\x1b[6n", 4) != 4)
     {
-	return -1;
+	die("get_cursor_position");
     }
 
     while(i < sizeof(buf) - 1)
@@ -32,45 +34,60 @@ get_cursor_position(int *rows, int *cols)
 
     if (buf[0] != '\x1b' || buf[1] != '[')
     {
-	return -1;
+	die("get_cursor_position");
     }
 
     if (sscanf(&buf[2], "%d;%d", rows, cols) != 2)
     {
-	return -1;
-    }    
+	die("get_cursor_position");
 
-    return 0;
+    }    
 }
 
 void
 die(const char* s)
 {
-    write(STDOUT_FILENO, "\x1b[2J", 4);
-    write(STDOUT_FILENO, "\x1b[H", 3);
-    
+    restore();
     perror(s);
     exit(1);
 }
 
-int
+void
+restore()
+{
+    struct renderb renderb = RENDERB_INIT;
+    renderb_append(&renderb, "\x1b[2J", 4);
+    renderb_append(&renderb, "\x1b[H", 3);
+    renderb_flush(&renderb);
+    renderb_free(&renderb);    
+}
+
+
+void
 get_window_size()
 {
     struct winsize ws;
 
     if (1 || ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0)
     {
-	if (write(STDOUT_FILENO, "\x1b[999C\x1b[999B", 12) != 12)
+	struct renderb renderb = RENDERB_INIT;
+	renderb_append(&renderb, "\x1b[999C\x1b[999B", 12);
+	if (renderb_flush(&renderb) != 12)
 	{
-	    return -1;
+	    renderb_free(&renderb);
+	    die("get_window_size");
 	}
-	return get_cursor_position(&config.screenrows, &config.screencols);
+	else
+	{
+	    renderb_free(&renderb);
+	}
+	
+        get_cursor_position(&config.screenrows, &config.screencols);
     }
     else
     {
 	config.screencols = ws.ws_col;
         config.screenrows = ws.ws_row;
-	return 0;
     }
 }
 

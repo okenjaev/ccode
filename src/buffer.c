@@ -1,5 +1,6 @@
 #include "buffer.h"
 
+static
 void
 buffer_row_update(struct buffer_row* row)
 {
@@ -38,20 +39,6 @@ buffer_row_update(struct buffer_row* row)
 }
 
 
-void
-buffer_init(struct buffer* buffer)
-{
-    buffer->cx = 0;
-    buffer->cy = 0;
-    buffer->rx = 0;
-    buffer->num_rows = 0;
-    buffer->row = NULL;
-    buffer->rowoff = 0;
-    buffer->coloff = 0;
-    buffer->file_name = NULL;
-    buffer->status_message[0] = '\0';
-    buffer->status_message_time = 0;
-}
 
 void
 buffer_append_row(struct buffer* buffer, char* string, int len)
