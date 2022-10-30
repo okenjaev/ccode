@@ -1,22 +1,8 @@
 #include "term.h"
 #include "sys.h"
+#include "buffer.h"
 
-struct term_config e;
-
-void
-term_init(struct term_config* config)
-{
-    config->cx = 0;
-    config->cy = 0;
-    config->rx = 0;
-    config->num_rows = 0;
-    config->row = NULL;
-    config->rowoff = 0;
-    config->coloff = 0;
-    config->file_name = NULL;
-    config->status_message[0] = '\0';
-    config->status_message_time = 0;
-}
+extern struct buffer e;
 
 int
 term_get_window_size(int *rows, int *cols)
@@ -67,9 +53,15 @@ term_get_cursor_position(int *rows, int *cols)
 
     buf[i] = '\0';
 
-    if (buf[0] != '\x1b' || buf[1] != '[') return -1;
-    if (sscanf(&buf[2], "%d;%d", rows, cols) != 2) return -1;
-    
+    if (buf[0] != '\x1b' || buf[1] != '[')
+    {
+	return -1;
+    }
+
+    if (sscanf(&buf[2], "%d;%d", rows, cols) != 2)
+    {
+	return -1;
+    }    
     return 0;
 }
 

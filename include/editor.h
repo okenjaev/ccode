@@ -4,9 +4,9 @@
 #include "common.h"
 #include "renderb.h"
 #include "sys.h"
-#include "term.h"
+#include "buffer.h"
 
-extern struct term_config e;
+extern struct buffer e;
 
 void
 editor_set_status_message(const char* fmt, ...);

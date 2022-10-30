@@ -1,5 +1,6 @@
 #include "editor.h"
 #include "render.h"
+#include "term.h"
 
 enum editor_keys
 {
@@ -15,7 +16,7 @@ enum editor_keys
 };
 
 int
-editor_row_to_render_row(struct editor_row* row, int cx)
+buffer_row_to_render_row(struct buffer_row* row, int cx)
 {
     int rx = 0;
     for(int i =0; i < cx; i++)
@@ -38,7 +39,7 @@ editor_scroll()
 
     if (e.cy < e.num_rows)
     {
-	e.rx = editor_row_to_render_row(&e.row[e.cy], e.cx);
+	e.rx = buffer_row_to_render_row(&e.row[e.cy], e.cx);
     }
 
     if (e.cy < e.rowoff)
@@ -61,64 +62,9 @@ editor_scroll()
 }
 
 void
-editor_update_row(struct editor_row* row)
-{
-    int tabs = 0;
-
-    for (int j =0; j < row->size; j++)
-    {
-	if (row->data[j] == '\t')
-	{
-	    tabs++;
-	}
-    }
-    
-    free(row->render);
-    row->render = malloc(row->size + tabs * (NUMBER_OF_SPACES_FOR_TAB - 1) + 1);
-
-    int idx = 0;
-    for (int j = 0; j < row->size; j++)
-    {
-	if (row->data[j] == '\t')
-	{
-	    row->render[idx++] = ' ';
-	    while(idx % NUMBER_OF_SPACES_FOR_TAB != 0)
-	    {
-		row->render[idx++] = ' ';
-	    }
-	}
-	else
-	{
-	    row->render[idx++] = row->data[j];
-	}
-    }
-
-    row->render[idx] = '\0';
-    row->rsize = idx;
-}
-
-void editor_append_row(char* string, int len)
-{
-    e.row = realloc(e.row, sizeof(struct editor_row) * (e.num_rows + 1));
-
-    struct editor_row *at = &e.row[e.num_rows];
-    
-    at->size = len;
-    at->data = malloc(len + 1);
-    memcpy(at->data, string, len);
-    at->data[len] = '\0';
-    at->rsize = 0;
-    at->render = NULL;
-
-    editor_update_row(at);
-
-    e.num_rows++;
-}
-
-void
 editor_move_cursor(int key)
 {
-    struct editor_row* row = (e.cy >= e.num_rows) ? NULL : &e.row[e.cy]; 
+    struct buffer_row* row = (e.cy >= e.num_rows) ? NULL : &e.row[e.cy]; 
     
     switch (key)
     {
@@ -271,7 +217,7 @@ editor_draw_rows(struct renderb* renderb)
 	}
 	else
 	{
-	    struct editor_row row = e.row[filerow];
+	    struct buffer_row row = e.row[filerow];
 	    int len = row.rsize - e.coloff;
 	    if (len < 0)
 	    {
@@ -314,7 +260,8 @@ editor_open(const char* file_name)
 	{
 	    linelen--;
 	}
-	editor_append_row(line, linelen);
+	
+        buffer_append_row(&e, line, linelen);
     }
 
     free(line);
@@ -324,7 +271,9 @@ editor_open(const char* file_name)
 void
 editor_init()
 {
-    term_init(&e);
+    term_enable_raw_mode();
+
+    buffer_init(&e);
     
     if (term_get_window_size(&e.screenrows, &e.screencols) == -1)
     {

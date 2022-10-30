@@ -1,9 +1,7 @@
-#include "common.h"
 #include "editor.h"
 
 int main(int argc, char *argv[])
 {
-    term_enable_raw_mode();
     editor_init();
 
     if (argc >= 2)
