@@ -1,7 +1,5 @@
 #include "buffer.h"
 
-struct buffer e;
-
 void
 buffer_row_update(struct buffer_row* row)
 {

@@ -2,6 +2,8 @@
 #include "sys.h"
 #include "renderb.h"
 
+extern struct config config;
+
 enum editor_keys
 {
     ARROW_LEFT = 1000,
@@ -47,17 +49,17 @@ editor_scroll(struct buffer* buffer)
 	buffer->rowoff = buffer->cy;
     }
 
-    if (buffer->cy >= buffer->rowoff + buffer->screenrows)
+    if (buffer->cy >= buffer->rowoff + config.screenrows)
     {
-	buffer->rowoff = buffer->cy - buffer->screenrows + 1;
+	buffer->rowoff = buffer->cy - config.screenrows + 1;
     }
 
     if (buffer->rx < buffer->coloff) {
 	buffer->coloff = buffer->rx;
     }
     
-    if (buffer->rx >= buffer->coloff + buffer->screencols) {
-	buffer->coloff = buffer->rx - buffer->screencols + 1;
+    if (buffer->rx >= buffer->coloff + config.screencols) {
+	buffer->coloff = buffer->rx - config.screencols + 1;
     }
 }
 
@@ -132,15 +134,15 @@ editor_draw_status_bar(const struct buffer* buffer, struct renderb* renderb)
 		       buffer->file_name ? buffer->file_name : "[empty]", buffer->num_rows, buffer->cy);
     int rlen = snprintf(rstatus, sizeof(rstatus), "%d/%d", buffer->cy + 1, buffer->num_rows);
 
-    if (len > buffer->screencols)
+    if (len > config.screencols)
     {
-	len = buffer->screencols;
+	len = config.screencols;
     }
 
     renderb_append(renderb, status, len);
-    while(len < buffer->screencols)
+    while(len < config.screencols)
     {
-	if (buffer->screencols - len == rlen)
+	if (config.screencols - len == rlen)
 	{
 	    renderb_append(renderb, rstatus, rlen);
 	    break;
@@ -161,8 +163,8 @@ void editor_draw_status_message(const struct buffer* buffer, struct renderb* ren
     renderb_append(renderb, "\x1b[K", 3);
     int meslen = strlen(buffer->status_message);
 
-    if (meslen > buffer->screencols){
-	meslen = buffer->screencols;
+    if (meslen > config.screencols){
+	meslen = config.screencols;
     }
 
     if (meslen && time(NULL) - buffer->status_message_time < 5)
@@ -174,21 +176,21 @@ void editor_draw_status_message(const struct buffer* buffer, struct renderb* ren
 void
 editor_draw_rows(const struct buffer* buffer, struct renderb* renderb)
 {
-    for(int y=0; y<buffer->screenrows; y++)
+    for(int y=0; y<config.screenrows; y++)
     {
 	int filerow = y + buffer->rowoff;
 	if (filerow >= buffer->num_rows) {
-	    if (buffer->num_rows == 0 && y == buffer->screenrows / 3)
+	    if (buffer->num_rows == 0 && y == config.screenrows / 3)
 	    {
 		char welcome[80];
 		int welcomelen = snprintf(welcome, sizeof(welcome),
 					  "4me version %s", FORME_VERSION);
-		if (welcomelen > buffer->screencols)
+		if (welcomelen > config.screencols)
 		{
-		    welcomelen = buffer->screencols;
+		    welcomelen = config.screencols;
 		}
 
-		int padding = (buffer->screencols - welcomelen) / 2;
+		int padding = (config.screencols - welcomelen) / 2;
 		if (padding)
 		{
 		    renderb_append(renderb, "~", 1);
@@ -213,9 +215,9 @@ editor_draw_rows(const struct buffer* buffer, struct renderb* renderb)
 	    {
 		len = 0;
 	    }
-	    if (len > buffer->screencols)
+	    if (len > config.screencols)
 	    {
-		len = buffer->screencols;
+		len = config.screencols;
 	    }
 	    
 	    renderb_append(renderb, &row.render[buffer->coloff], len);
@@ -277,12 +279,9 @@ editor_init()
 
     buffer_init(&current_buffer);
     
-    if (get_window_size(&current_buffer.screenrows, &current_buffer.screencols) == -1)
-    {
-        die("getwindowsize");
-    }
+    get_window_size();
 
-    current_buffer.screenrows -= 2;
+    config.screenrows -= 2;
 }
 
 void
@@ -440,14 +439,14 @@ editor_process_keys()
 	}
 	else if (c == PAGE_DOWN)
 	{
-	    current_buffer.cy = current_buffer.rowoff + current_buffer.screenrows - 1;
+	    current_buffer.cy = current_buffer.rowoff + config.screenrows - 1;
 	    if (current_buffer.cy > current_buffer.num_rows)
 	    {
 		current_buffer.cy = current_buffer.num_rows;
 	    }
 	}
 
-	int times = current_buffer.screenrows;
+	int times = config.screenrows;
 	while(times--)
 	{
 	    editor_move_cursor(&current_buffer, c == PAGE_UP? ARROW_UP: ARROW_DOWN);

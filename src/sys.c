@@ -1,38 +1,6 @@
 #include "sys.h"
-#include "common.h"
 
-struct termios og_mode;    
-
-void
-die(const char* s)
-{
-    write(STDOUT_FILENO, "\x1b[2J", 4);
-    write(STDOUT_FILENO, "\x1b[H", 3);
-    
-    perror(s);
-    exit(1);
-}
-
-int
-get_window_size(int *rows, int *cols)
-{
-    struct winsize ws;
-
-    if (1 || ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0)
-    {
-	if (write(STDOUT_FILENO, "\x1b[999C\x1b[999B", 12) != 12)
-	{
-	    return -1;
-	}
-	return get_cursor_position(rows, cols);
-    }
-    else
-    {
-	*cols = ws.ws_col;
-	*rows = ws.ws_row;
-	return 0;
-    }
-}
+struct config config;
 
 int
 get_cursor_position(int *rows, int *cols)
@@ -71,13 +39,46 @@ get_cursor_position(int *rows, int *cols)
     {
 	return -1;
     }    
+
     return 0;
 }
 
 void
+die(const char* s)
+{
+    write(STDOUT_FILENO, "\x1b[2J", 4);
+    write(STDOUT_FILENO, "\x1b[H", 3);
+    
+    perror(s);
+    exit(1);
+}
+
+int
+get_window_size()
+{
+    struct winsize ws;
+
+    if (1 || ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0)
+    {
+	if (write(STDOUT_FILENO, "\x1b[999C\x1b[999B", 12) != 12)
+	{
+	    return -1;
+	}
+	return get_cursor_position(&config.screenrows, &config.screencols);
+    }
+    else
+    {
+	config.screencols = ws.ws_col;
+        config.screenrows = ws.ws_row;
+	return 0;
+    }
+}
+
+
+void
 disable_raw_mode()
 {
-    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &og_mode) == -1)
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &config.og_mode) == -1)
     {
         die("tcsetattr");
     }
@@ -86,13 +87,13 @@ disable_raw_mode()
 void
 enable_raw_mode()
 {
-    if (tcgetattr(STDIN_FILENO, &og_mode) == -1)
+    if (tcgetattr(STDIN_FILENO, &config.og_mode) == -1)
     {
         die("tsgetattr");
     }
     atexit(disable_raw_mode);
     
-    struct termios raw = og_mode;
+    struct termios raw = config.og_mode;
     raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
     raw.c_oflag &= ~(OPOST);
     raw.c_cflag |= (CS8);

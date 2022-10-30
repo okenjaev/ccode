@@ -16,13 +16,11 @@ struct buffer
     int cx;
     int cy;
     int rx;
-    int screenrows;
-    int screencols;
     int num_rows;
     int rowoff;
     int coloff;
-    time_t status_message_time;
     char* file_name;
+    time_t status_message_time;
     char status_message[80];
     struct buffer_row *row;
 };
