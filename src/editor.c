@@ -1,6 +1,6 @@
 #include "editor.h"
 #include "render.h"
-#include "term.h"
+#include "sys.h"
 
 enum editor_keys
 {
@@ -271,11 +271,11 @@ editor_open(const char* file_name)
 void
 editor_init()
 {
-    term_enable_raw_mode();
+    enable_raw_mode();
 
     buffer_init(&e);
     
-    if (term_get_window_size(&e.screenrows, &e.screencols) == -1)
+    if (get_window_size(&e.screenrows, &e.screencols) == -1)
     {
         die("getwindowsize");
     }

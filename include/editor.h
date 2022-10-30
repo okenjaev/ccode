@@ -3,7 +3,6 @@
 
 #include "common.h"
 #include "renderb.h"
-#include "sys.h"
 #include "buffer.h"
 
 extern struct buffer e;
