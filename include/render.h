@@ -2,9 +2,9 @@
 #define RENDER_H
 
 #include "common.h"
-#include "buffer.h"
+#include "renderb.h"
 
 void
-render(const struct buffer* buffer);
+render(const struct renderb* renderb);
 
 #endif /* RENDER_H */

@@ -2,7 +2,7 @@
 #define EDITOR_H
 
 #include "common.h"
-#include "buffer.h"
+#include "renderb.h"
 #include "sys.h"
 #include "term.h"
 
@@ -18,7 +18,7 @@ void
 editor_move_cursor(int key);
 
 void
-editor_draw_rows(struct buffer* ab);
+editor_draw_rows(struct renderb* ab);
 
 void
 editor_refresh_screen();

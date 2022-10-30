@@ -1,7 +1,7 @@
 #include "render.h"
 
 void
-render(const struct buffer* buffer)
+render(const struct renderb* renderb)
 {
-    write(STDOUT_FILENO, buffer->data, buffer->len);
+    write(STDOUT_FILENO, renderb->data, renderb->len);
 }

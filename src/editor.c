@@ -177,19 +177,19 @@ editor_set_status_message(const char* fmt, ...)
 }
 
 void
-editor_set_cursor_position(struct buffer* buffer)
+editor_set_cursor_position(struct renderb* renderb)
 {
     int y = e.cy - e.rowoff + 1;
     int x = e.rx - e.coloff + 1;
     char cur_pos[32];
     snprintf(cur_pos, sizeof(cur_pos), "\x1b[%d;%dH", y, x);
-    buffer_append(buffer, cur_pos, strlen(cur_pos));
+    renderb_append(renderb, cur_pos, strlen(cur_pos));
 }
 
 void
-editor_draw_status_bar(struct buffer* buffer)
+editor_draw_status_bar(struct renderb* renderb)
 {
-    buffer_append(buffer, "\x1b[7m", 4);
+    renderb_append(renderb, "\x1b[7m", 4);
 
     char status[80], rstatus[80];
     int len = snprintf(status, sizeof(status), "%.20s",
@@ -201,28 +201,28 @@ editor_draw_status_bar(struct buffer* buffer)
 	len = e.screencols;
     }
 
-    buffer_append(buffer, status, len);
+    renderb_append(renderb, status, len);
     while(len < e.screencols)
     {
 	if (e.screencols - len == rlen)
 	{
-	    buffer_append(buffer, rstatus, rlen);
+	    renderb_append(renderb, rstatus, rlen);
 	    break;
 	}
 	else
 	{
-	    buffer_append(buffer, " ", 1);
+	    renderb_append(renderb, " ", 1);
 	    len++;
 	}
     }
 
-    buffer_append(buffer, "\x1b[m", 3);
-    buffer_append(buffer, "\r\n", 2);
+    renderb_append(renderb, "\x1b[m", 3);
+    renderb_append(renderb, "\r\n", 2);
 }
 
-void editor_draw_status_message(struct buffer* buffer)
+void editor_draw_status_message(struct renderb* renderb)
 {
-    buffer_append(buffer, "\x1b[K", 3);
+    renderb_append(renderb, "\x1b[K", 3);
     int meslen = strlen(e.status_message);
 
     if (meslen > e.screencols){
@@ -231,12 +231,12 @@ void editor_draw_status_message(struct buffer* buffer)
 
     if (meslen && time(NULL) - e.status_message_time < 5)
     {
-	buffer_append(buffer, e.status_message, meslen);	
+	renderb_append(renderb, e.status_message, meslen);	
     }
 }
 
 void
-editor_draw_rows(struct buffer* buffer)
+editor_draw_rows(struct renderb* renderb)
 {
     for(int y=0; y<e.screenrows; y++)
     {
@@ -255,18 +255,18 @@ editor_draw_rows(struct buffer* buffer)
 		int padding = (e.screencols - welcomelen) / 2;
 		if (padding)
 		{
-		    buffer_append(buffer, "~", 1);
+		    renderb_append(renderb, "~", 1);
 		    padding--;
 		}
 
 		while (padding--)
 		{
-		    buffer_append(buffer, " ", 1);
+		    renderb_append(renderb, " ", 1);
 		}
 
-		buffer_append(buffer, welcome, welcomelen);
+		renderb_append(renderb, welcome, welcomelen);
 	    } else {
-		buffer_append(buffer, "~", 1);	    
+		renderb_append(renderb, "~", 1);	    
 	    }    
 	}
 	else
@@ -282,11 +282,11 @@ editor_draw_rows(struct buffer* buffer)
 		len = e.screencols;
 	    }
 	    
-	    buffer_append(buffer, &row.render[e.coloff], len);
+	    renderb_append(renderb, &row.render[e.coloff], len);
 	}
 	
-	buffer_append(buffer, "\x1b[K", 3);
-	buffer_append(buffer, "\r\n", 2);
+	renderb_append(renderb, "\x1b[K", 3);
+	renderb_append(renderb, "\r\n", 2);
     }
 }
 
@@ -339,20 +339,20 @@ editor_refresh_screen()
 {
     editor_scroll();
     
-    struct buffer buffer = BUFFER_INIT;
+    struct renderb renderb = RENDERB_INIT;
 
-    buffer_append(&buffer, "\x1b[?25l", 6);
-    buffer_append(&buffer, "\x1b[H", 3);
+    renderb_append(&renderb, "\x1b[?25l", 6);
+    renderb_append(&renderb, "\x1b[H", 3);
 
-    editor_draw_rows(&buffer);
-    editor_draw_status_bar(&buffer);
-    editor_draw_status_message(&buffer);
-    editor_set_cursor_position(&buffer);
+    editor_draw_rows(&renderb);
+    editor_draw_status_bar(&renderb);
+    editor_draw_status_message(&renderb);
+    editor_set_cursor_position(&renderb);
     
-    buffer_append(&buffer, "\x1b[?25h", 6);
+    renderb_append(&renderb, "\x1b[?25h", 6);
 
-    render(&buffer);
-    buffer_free(&buffer);
+    render(&renderb);
+    renderb_free(&renderb);
 }
 
 int
@@ -456,11 +456,11 @@ editor_process_keys()
     switch(c)
     {
     case CTRL_KEY('q'):
-	struct buffer buffer = BUFFER_INIT;
-	buffer_append(&buffer, "\x1b[2J", 4);
-        buffer_append(&buffer, "\x1b[H", 3);
-	render(&buffer);
-	buffer_free(&buffer);
+	struct renderb renderb = RENDERB_INIT;
+	renderb_append(&renderb, "\x1b[2J", 4);
+        renderb_append(&renderb, "\x1b[H", 3);
+	render(&renderb);
+	renderb_free(&renderb);
 	exit(0);
 	break;
     case ARROW_UP:
