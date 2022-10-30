@@ -18,3 +18,9 @@ renderb_free(struct renderb *renderb)
 {
     free(renderb->data);
 }
+
+void
+renderb_flush(const struct renderb* renderb)
+{
+    write(STDOUT_FILENO, renderb->data, renderb->len);
+}

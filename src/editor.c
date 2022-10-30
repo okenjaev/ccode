@@ -1,6 +1,6 @@
 #include "editor.h"
-#include "render.h"
 #include "sys.h"
+#include "renderb.h"
 
 enum editor_keys
 {
@@ -33,124 +33,114 @@ buffer_row_to_render_row(struct buffer_row* row, int cx)
 }
 
 void
-editor_scroll()
+editor_scroll(struct buffer* buffer)
 {
-    e.rx = e.cx;
+    buffer->rx = buffer->cx;
 
-    if (e.cy < e.num_rows)
+    if (buffer->cy < buffer->num_rows)
     {
-	e.rx = buffer_row_to_render_row(&e.row[e.cy], e.cx);
+	buffer->rx = buffer_row_to_render_row(&buffer->row[buffer->cy], buffer->cx);
     }
 
-    if (e.cy < e.rowoff)
+    if (buffer->cy < buffer->rowoff)
     {
-	e.rowoff = e.cy;
+	buffer->rowoff = buffer->cy;
     }
 
-    if (e.cy >= e.rowoff + e.screenrows)
+    if (buffer->cy >= buffer->rowoff + buffer->screenrows)
     {
-	e.rowoff = e.cy - e.screenrows + 1;
+	buffer->rowoff = buffer->cy - buffer->screenrows + 1;
     }
 
-    if (e.rx < e.coloff) {
-	e.coloff = e.rx;
+    if (buffer->rx < buffer->coloff) {
+	buffer->coloff = buffer->rx;
     }
     
-    if (e.rx >= e.coloff + e.screencols) {
-	e.coloff = e.rx - e.screencols + 1;
+    if (buffer->rx >= buffer->coloff + buffer->screencols) {
+	buffer->coloff = buffer->rx - buffer->screencols + 1;
     }
 }
 
 void
-editor_move_cursor(int key)
+editor_move_cursor(struct buffer* buffer,int key)
 {
-    struct buffer_row* row = (e.cy >= e.num_rows) ? NULL : &e.row[e.cy]; 
+    struct buffer_row* row = (buffer->cy >= buffer->num_rows) ? NULL : &buffer->row[buffer->cy]; 
     
     switch (key)
     {
     case ARROW_LEFT:
-	if (e.cx != 0)
+	if (buffer->cx != 0)
 	{
-	    e.cx--;	    
+	    buffer->cx--;	    
 	}
-	else if (e.cy > 0)
+	else if (buffer->cy > 0)
 	{
-	    e.cy--;
-	    e.cx = e.row[e.cy].size;
+	    buffer->cy--;
+	    buffer->cx = buffer->row[buffer->cy].size;
 	}
 	break;
     case ARROW_RIGHT:
-	if (row && e.cx < row->size)
+	if (row && buffer->cx < row->size)
 	{
-	    e.cx++;	    	    
+	    buffer->cx++;	    	    
 	}
-	else if (row && e.cx == row->size)
+	else if (row && buffer->cx == row->size)
 	{
-	    e.cy++;
-	    e.cx = 0;
+	    buffer->cy++;
+	    buffer->cx = 0;
 	}
 	break;
     case ARROW_UP:
-	if (e.cy != 0)
+	if (buffer->cy != 0)
 	{
-	    e.cy--;	    
+	    buffer->cy--;	    
 	}
 	break;
     case ARROW_DOWN:
-	if (e.cy < e.num_rows)
+	if (buffer->cy < buffer->num_rows)
 	{
-	    e.cy++;	    
+	    buffer->cy++;	    
 	}
 	break;
     }
 
-    row = (e.cy >= e.num_rows) ? NULL : &e.row[e.cy];
+    row = (buffer->cy >= buffer->num_rows) ? NULL : &buffer->row[buffer->cy];
     int rowlen = row ? row->size : 0;
-    if (e.cx > rowlen)
+    if (buffer->cx > rowlen)
     {
-	e.cx = rowlen;
+	buffer->cx = rowlen;
     }
 }
 
 void
-editor_set_status_message(const char* fmt, ...)
+editor_set_cursor_position(const struct buffer* buffer, struct renderb* renderb)
 {
-    va_list ap;
-    va_start(ap, fmt);
-    vsnprintf(e.status_message, sizeof(e.status_message), fmt, ap);
-    va_end(ap);
-    e.status_message_time = time(NULL);
-}
-
-void
-editor_set_cursor_position(struct renderb* renderb)
-{
-    int y = e.cy - e.rowoff + 1;
-    int x = e.rx - e.coloff + 1;
+    int y = buffer->cy - buffer->rowoff + 1;
+    int x = buffer->rx - buffer->coloff + 1;
     char cur_pos[32];
     snprintf(cur_pos, sizeof(cur_pos), "\x1b[%d;%dH", y, x);
     renderb_append(renderb, cur_pos, strlen(cur_pos));
 }
 
 void
-editor_draw_status_bar(struct renderb* renderb)
+editor_draw_status_bar(const struct buffer* buffer, struct renderb* renderb)
 {
     renderb_append(renderb, "\x1b[7m", 4);
 
     char status[80], rstatus[80];
     int len = snprintf(status, sizeof(status), "%.20s",
-		       e.file_name ? e.file_name : "[empty]", e.num_rows, e.cy);
-    int rlen = snprintf(rstatus, sizeof(rstatus), "%d/%d", e.cy + 1, e.num_rows);
+		       buffer->file_name ? buffer->file_name : "[empty]", buffer->num_rows, buffer->cy);
+    int rlen = snprintf(rstatus, sizeof(rstatus), "%d/%d", buffer->cy + 1, buffer->num_rows);
 
-    if (len > e.screencols)
+    if (len > buffer->screencols)
     {
-	len = e.screencols;
+	len = buffer->screencols;
     }
 
     renderb_append(renderb, status, len);
-    while(len < e.screencols)
+    while(len < buffer->screencols)
     {
-	if (e.screencols - len == rlen)
+	if (buffer->screencols - len == rlen)
 	{
 	    renderb_append(renderb, rstatus, rlen);
 	    break;
@@ -166,39 +156,39 @@ editor_draw_status_bar(struct renderb* renderb)
     renderb_append(renderb, "\r\n", 2);
 }
 
-void editor_draw_status_message(struct renderb* renderb)
+void editor_draw_status_message(const struct buffer* buffer, struct renderb* renderb)
 {
     renderb_append(renderb, "\x1b[K", 3);
-    int meslen = strlen(e.status_message);
+    int meslen = strlen(buffer->status_message);
 
-    if (meslen > e.screencols){
-	meslen = e.screencols;
+    if (meslen > buffer->screencols){
+	meslen = buffer->screencols;
     }
 
-    if (meslen && time(NULL) - e.status_message_time < 5)
+    if (meslen && time(NULL) - buffer->status_message_time < 5)
     {
-	renderb_append(renderb, e.status_message, meslen);	
+	renderb_append(renderb, buffer->status_message, meslen);	
     }
 }
 
 void
-editor_draw_rows(struct renderb* renderb)
+editor_draw_rows(const struct buffer* buffer, struct renderb* renderb)
 {
-    for(int y=0; y<e.screenrows; y++)
+    for(int y=0; y<buffer->screenrows; y++)
     {
-	int filerow = y + e.rowoff;
-	if (filerow >= e.num_rows) {
-	    if (e.num_rows == 0 && y == e.screenrows / 3)
+	int filerow = y + buffer->rowoff;
+	if (filerow >= buffer->num_rows) {
+	    if (buffer->num_rows == 0 && y == buffer->screenrows / 3)
 	    {
 		char welcome[80];
 		int welcomelen = snprintf(welcome, sizeof(welcome),
 					  "4me version %s", FORME_VERSION);
-		if (welcomelen > e.screencols)
+		if (welcomelen > buffer->screencols)
 		{
-		    welcomelen = e.screencols;
+		    welcomelen = buffer->screencols;
 		}
 
-		int padding = (e.screencols - welcomelen) / 2;
+		int padding = (buffer->screencols - welcomelen) / 2;
 		if (padding)
 		{
 		    renderb_append(renderb, "~", 1);
@@ -217,18 +207,18 @@ editor_draw_rows(struct renderb* renderb)
 	}
 	else
 	{
-	    struct buffer_row row = e.row[filerow];
-	    int len = row.rsize - e.coloff;
+	    struct buffer_row row = buffer->row[filerow];
+	    int len = row.rsize - buffer->coloff;
 	    if (len < 0)
 	    {
 		len = 0;
 	    }
-	    if (len > e.screencols)
+	    if (len > buffer->screencols)
 	    {
-		len = e.screencols;
+		len = buffer->screencols;
 	    }
 	    
-	    renderb_append(renderb, &row.render[e.coloff], len);
+	    renderb_append(renderb, &row.render[buffer->coloff], len);
 	}
 	
 	renderb_append(renderb, "\x1b[K", 3);
@@ -236,11 +226,23 @@ editor_draw_rows(struct renderb* renderb)
     }
 }
 
+struct buffer current_buffer;
+
+void
+editor_set_status_message(const char* fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(current_buffer.status_message, sizeof(current_buffer.status_message), fmt, ap);
+    va_end(ap);
+    current_buffer.status_message_time = time(NULL);
+}
+
 void
 editor_open(const char* file_name)
 {
-    free(e.file_name);
-    e.file_name = strdup(file_name);
+    free(current_buffer.file_name);
+    current_buffer.file_name = strdup(file_name);
     
     FILE *fp = fopen(file_name, "r");
     if(!fp)
@@ -261,7 +263,7 @@ editor_open(const char* file_name)
 	    linelen--;
 	}
 	
-        buffer_append_row(&e, line, linelen);
+        buffer_append_row(&current_buffer, line, linelen);
     }
 
     free(line);
@@ -273,34 +275,34 @@ editor_init()
 {
     enable_raw_mode();
 
-    buffer_init(&e);
+    buffer_init(&current_buffer);
     
-    if (get_window_size(&e.screenrows, &e.screencols) == -1)
+    if (get_window_size(&current_buffer.screenrows, &current_buffer.screencols) == -1)
     {
         die("getwindowsize");
     }
 
-    e.screenrows -= 2;
+    current_buffer.screenrows -= 2;
 }
 
 void
 editor_refresh_screen()
 {
-    editor_scroll();
+    editor_scroll(&current_buffer);
     
     struct renderb renderb = RENDERB_INIT;
 
     renderb_append(&renderb, "\x1b[?25l", 6);
     renderb_append(&renderb, "\x1b[H", 3);
 
-    editor_draw_rows(&renderb);
-    editor_draw_status_bar(&renderb);
-    editor_draw_status_message(&renderb);
-    editor_set_cursor_position(&renderb);
+    editor_draw_rows(&current_buffer, &renderb);
+    editor_draw_status_bar(&current_buffer, &renderb);
+    editor_draw_status_message(&current_buffer, &renderb);
+    editor_set_cursor_position(&current_buffer, &renderb);
     
     renderb_append(&renderb, "\x1b[?25h", 6);
 
-    render(&renderb);
+    renderb_flush(&renderb);
     renderb_free(&renderb);
 }
 
@@ -408,7 +410,7 @@ editor_process_keys()
 	struct renderb renderb = RENDERB_INIT;
 	renderb_append(&renderb, "\x1b[2J", 4);
         renderb_append(&renderb, "\x1b[H", 3);
-	render(&renderb);
+	renderb_flush(&renderb);
 	renderb_free(&renderb);
 	exit(0);
 	break;
@@ -416,16 +418,16 @@ editor_process_keys()
     case ARROW_LEFT:
     case ARROW_RIGHT:
     case ARROW_DOWN:
-	editor_move_cursor(c);
+	editor_move_cursor(&current_buffer, c);
 	break;
 
     case HOME_KEY:
-	e.cx = 0;
+	current_buffer.cx = 0;
 	break;
     case END_KEY:
-	if (e.cy < e.num_rows)
+	if (current_buffer.cy < current_buffer.num_rows)
 	{
-	    e.cx = e.row[e.cy].size;	    
+	    current_buffer.cx = current_buffer.row[current_buffer.cy].size;	    
 	}
 	break;
 	
@@ -434,21 +436,21 @@ editor_process_keys()
     {
 	if (c == PAGE_UP)
 	{
-	    e.cy = e.rowoff;
+	    current_buffer.cy = current_buffer.rowoff;
 	}
 	else if (c == PAGE_DOWN)
 	{
-	    e.cy = e.rowoff + e.screenrows - 1;
-	    if (e.cy > e.num_rows)
+	    current_buffer.cy = current_buffer.rowoff + current_buffer.screenrows - 1;
+	    if (current_buffer.cy > current_buffer.num_rows)
 	    {
-		e.cy = e.num_rows;
+		current_buffer.cy = current_buffer.num_rows;
 	    }
 	}
 
-	int times = e.screenrows;
+	int times = current_buffer.screenrows;
 	while(times--)
 	{
-	    editor_move_cursor(c == PAGE_UP? ARROW_UP: ARROW_DOWN);
+	    editor_move_cursor(&current_buffer, c == PAGE_UP? ARROW_UP: ARROW_DOWN);
 	}
     }
     break;

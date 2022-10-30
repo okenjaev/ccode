@@ -1,8 +1,7 @@
 #include "sys.h"
 #include "common.h"
-#include "buffer.h"
 
-extern struct buffer e;
+struct termios og_mode;    
 
 void
 die(const char* s)
@@ -78,7 +77,7 @@ get_cursor_position(int *rows, int *cols)
 void
 disable_raw_mode()
 {
-    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &e.og_mode) == -1)
+    if (tcsetattr(STDIN_FILENO, TCSAFLUSH, &og_mode) == -1)
     {
         die("tcsetattr");
     }
@@ -87,13 +86,13 @@ disable_raw_mode()
 void
 enable_raw_mode()
 {
-    if (tcgetattr(STDIN_FILENO, &e.og_mode) == -1)
+    if (tcgetattr(STDIN_FILENO, &og_mode) == -1)
     {
         die("tsgetattr");
     }
     atexit(disable_raw_mode);
     
-    struct termios raw = e.og_mode;
+    struct termios raw = og_mode;
     raw.c_iflag &= ~(BRKINT | ICRNL | INPCK | ISTRIP | IXON);
     raw.c_oflag &= ~(OPOST);
     raw.c_cflag |= (CS8);

@@ -25,7 +25,6 @@ struct buffer
     char* file_name;
     char status_message[80];
     struct buffer_row *row;
-    struct termios og_mode;    
 };
 
 void
