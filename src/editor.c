@@ -1,21 +1,9 @@
 #include "editor.h"
 #include "sys.h"
 #include "renderb.h"
+#include "input.h"
 
 extern struct config config;
-
-enum editor_keys
-{
-    ARROW_LEFT = 1000,
-    ARROW_RIGHT,
-    ARROW_UP,
-    ARROW_DOWN,
-    PAGE_UP,
-    PAGE_DOWN,
-    HOME_KEY,
-    END_KEY,
-    DEL_KEY
-};
 
 int
 buffer_row_to_render_row(struct buffer_row* row, int cx)
@@ -245,31 +233,8 @@ editor_open(const char* file_name)
 {
     free(current_buffer.file_name);
     current_buffer.file_name = strdup(file_name);
-    
-    FILE *fp = fopen(file_name, "r");
-    if(!fp)
-    {
-	die("file_open");
-    }
 
-    char* line = NULL;
-    size_t linecap = 0;
-    ssize_t linelen = 0;
-
-    while ((linelen = getline(&line, &linecap, fp)) != -1)
-    {
-	
-	while(linelen > 0 && (line[linelen - 1] == '\n' ||
-			      line[linelen-1] == '\r'))
-	{
-	    linelen--;
-	}
-	
-        buffer_append_row(&current_buffer, line, linelen);
-    }
-
-    free(line);
-    fclose(fp);
+    load_file(&current_buffer, file_name);
 }
 
 void
@@ -300,100 +265,6 @@ editor_refresh_screen()
 
     renderb_flush(&renderb);
     renderb_free(&renderb);
-}
-
-int
-editor_read_key()
-{
-    int nread;
-    char c;
-    while((nread = read(STDIN_FILENO, &c, 1)) != 1)
-    {
-	if (nread == -1 && errno != EAGAIN)
-	{
-	    die("read");
-	}
-    }
-
-    if (c == '\x1b')
-    {
-	char seq[3];
-
-	if (read(STDIN_FILENO, &seq[0], 1) != 1)
-	{
-	    return '\x1b';
-	}
-
-	if (read(STDIN_FILENO, &seq[1], 1) != 1)
-	{
-	    return '\x1b';
-	}
-
-	if (seq[0] == '[')
-	{
-	    if (seq[1] >= '0' && seq[1] <= '9')
-	    {
-		if (read(STDIN_FILENO, &seq[2], 1) != 1)
-		{
-		    return '\x1b';
-		}
-
-		if (seq[2] == '~')
-		{
-		    switch(seq[1])
-		    {
-		    case '1':
-			return HOME_KEY;
-		    case '3':
-			return DEL_KEY;
-		    case '4':
-			return END_KEY;
-		    case '5':
-			return PAGE_UP;
-		    case '6':
-			return PAGE_DOWN;
-		    case '7':
-			return HOME_KEY;
-		    case '8':
-			return END_KEY;
-		    }
-		}
-	    }
-	    else
-	    {
-		switch(seq[1])
-		{
-		case 'A':
-		    return ARROW_UP;
-		case 'B':
-		    return ARROW_DOWN;
-		case 'C':
-		    return ARROW_RIGHT;
-		case 'D':
-		    return ARROW_LEFT;
-		case 'H':
-		    return HOME_KEY;
-		case 'F':
-		    return END_KEY;
-		}
-	    }
-	}
-	else if (seq[0] == 'O')
-	{
-	    switch(seq[1])
-	    {
-	    case 'H':
-		return HOME_KEY;
-	    case 'F':
-		return END_KEY;
-	    }
-	}
-	return '\x1b';
-    }
-    else
-    {
-	return c;	
-    }    
 }
 
 void

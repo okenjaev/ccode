@@ -1,5 +1,6 @@
 #include "sys.h"
 #include "renderb.h"
+#include "buffer.h"
 
 struct config config;
 
@@ -62,7 +63,6 @@ restore()
     renderb_free(&renderb);    
 }
 
-
 void
 get_window_size()
 {
@@ -122,4 +122,34 @@ enable_raw_mode()
     {
         die("tcsetattr");
     }
+}
+
+// TODO: Maybe refactoring
+void
+load_file(struct buffer* buffer, const char* file_name)
+{
+    FILE *fp = fopen(file_name, "r");
+    if(!fp)
+    {
+	die("file_open");
+    }
+
+    char* line = NULL;
+    size_t linecap = 0;
+    ssize_t linelen = 0;
+
+    while ((linelen = getline(&line, &linecap, fp)) != -1)
+    {
+	
+	while(linelen > 0 && (line[linelen - 1] == '\n' ||
+			      line[linelen-1] == '\r'))
+	{
+	    linelen--;
+	}
+	
+        buffer_append_row(buffer, line, linelen);
+    }
+
+    free(line);
+    fclose(fp);
 }
