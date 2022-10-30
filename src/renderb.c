@@ -1,7 +1,7 @@
-#include "buffer.h"
+#include "renderb.h"
 
 void
-buffer_append(struct buffer *buffer, const char* s, int len)
+renderb_append(struct renderb *renderb, const char* s, int len)
 {
     char *new = realloc(buffer->data, buffer->len + len);
     if (new == NULL)
@@ -14,7 +14,7 @@ buffer_append(struct buffer *buffer, const char* s, int len)
 }
 
 void
-buffer_free(struct buffer *buffer)
+renderb_free(struct renderb *renderb)
 {
     free(buffer->data);
 }
