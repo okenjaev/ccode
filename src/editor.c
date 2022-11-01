@@ -1,6 +1,6 @@
 #include "editor.h"
 #include "sys.h"
-#include "renderb.h"
+#include "render.h"
 #include "input.h"
 #include "str.h"
 
@@ -25,7 +25,7 @@ editor_draw_status_bar(const struct buffer* buffer, struct str* renderb)
     int len = snprintf(status, sizeof(status), "%.20s",
 		       buffer->file_name ? buffer->file_name : "[empty]");
     int rlen = snprintf(rstatus, sizeof(rstatus), "%d/%d", buffer->cp.y + 1, buffer->num_rows);
-
+    
     if (len > config.screencols)
     {
 	len = config.screencols;
