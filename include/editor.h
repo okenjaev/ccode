@@ -11,10 +11,10 @@ void
 editor_init();
 
 void
-editor_refresh_screen();
+editor_draw_update();
 
 void
-editor_process_keys();
+editor_input_update();
 
 void
 editor_open(const char* file_name);

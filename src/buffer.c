@@ -1,4 +1,25 @@
 #include "buffer.h"
+#include "sys.h"
+
+extern struct config config;
+
+static
+int
+buffer_row_cx_to_rx(const struct buffer_row* row, int cx)
+{
+    int rx = 0;
+    for(int i =0; i < cx; i++)
+    {
+	if (row->data[i] == '\t')
+	{
+	    rx +=
+		(NUMBER_OF_SPACES_FOR_TAB - 1) -
+		(rx % NUMBER_OF_SPACES_FOR_TAB);
+	}
+	rx++;
+    }
+    return rx;
+}
 
 static
 void
@@ -38,6 +59,34 @@ buffer_row_update(struct buffer_row* row)
     row->rsize = idx;
 }
 
+void
+buffer_scroll_update(struct buffer* buffer)
+{
+    buffer->cp.r = buffer->cp.x;
+
+    if (buffer->cp.y < buffer->num_rows)
+    {
+	buffer->cp.r = buffer_row_cx_to_rx(&buffer->row[buffer->cp.y], buffer->cp.x);
+    }
+
+    if (buffer->cp.y < buffer->rowoff)
+    {
+	buffer->rowoff = buffer->cp.y;
+    }
+
+    if (buffer->cp.y >= buffer->rowoff + config.screenrows)
+    {
+	buffer->rowoff = buffer->cp.y - config.screenrows + 1;
+    }
+
+    if (buffer->cp.r < buffer->coloff) {
+	buffer->coloff = buffer->cp.r;
+    }
+    
+    if (buffer->cp.r >= buffer->coloff + config.screencols) {
+	buffer->coloff = buffer->cp.r - config.screencols + 1;
+    }
+}
 
 
 void

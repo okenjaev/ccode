@@ -3,6 +3,12 @@
 
 #include "common.h"
 
+struct cur_pos {
+    int x;
+    int y;
+    int r;
+};
+
 struct buffer_row
 {
     int size;
@@ -13,9 +19,7 @@ struct buffer_row
 
 struct buffer
 {
-    int cx;
-    int cy;
-    int rx;
+    struct cur_pos cp;
     int num_rows;
     int rowoff;
     int coloff;
@@ -25,9 +29,7 @@ struct buffer
     struct buffer_row *row;
 };
 
-#define BUFFER_INIT {.cx = 0, \
-	    .cy = 0, \
-	    .rx = 0, \
+#define BUFFER_INIT {.cp = {.x=0,.y=0,.r=0},	\
 	    .num_rows = 0,\
 	    .rowoff = 0, \
 	    .coloff= 0, \
@@ -38,5 +40,8 @@ struct buffer
 
 void
 buffer_append_row(struct buffer* buffer, char* string, int len);
+
+void
+buffer_scroll_update(struct buffer* buffer);
 
 #endif /* BUFFER_H */

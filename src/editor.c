@@ -5,108 +5,11 @@
 
 extern struct config config;
 
-int
-buffer_row_to_render_row(struct buffer_row* row, int cx)
-{
-    int rx = 0;
-    for(int i =0; i < cx; i++)
-    {
-	if (row->data[i] == '\t')
-	{
-	    rx +=
-		(NUMBER_OF_SPACES_FOR_TAB - 1) -
-		(rx % NUMBER_OF_SPACES_FOR_TAB);
-	}
-	rx++;
-    }
-    return rx;
-}
-
-void
-editor_scroll(struct buffer* buffer)
-{
-    buffer->rx = buffer->cx;
-
-    if (buffer->cy < buffer->num_rows)
-    {
-	buffer->rx = buffer_row_to_render_row(&buffer->row[buffer->cy], buffer->cx);
-    }
-
-    if (buffer->cy < buffer->rowoff)
-    {
-	buffer->rowoff = buffer->cy;
-    }
-
-    if (buffer->cy >= buffer->rowoff + config.screenrows)
-    {
-	buffer->rowoff = buffer->cy - config.screenrows + 1;
-    }
-
-    if (buffer->rx < buffer->coloff) {
-	buffer->coloff = buffer->rx;
-    }
-    
-    if (buffer->rx >= buffer->coloff + config.screencols) {
-	buffer->coloff = buffer->rx - config.screencols + 1;
-    }
-}
-
-void
-editor_move_cursor(struct buffer* buffer,int key)
-{
-    struct buffer_row* row = (buffer->cy >= buffer->num_rows) ? NULL : &buffer->row[buffer->cy]; 
-    
-    switch (key)
-    {
-    case ARROW_LEFT:
-	if (buffer->cx != 0)
-	{
-	    buffer->cx--;	    
-	}
-	else if (buffer->cy > 0)
-	{
-	    buffer->cy--;
-	    buffer->cx = buffer->row[buffer->cy].size;
-	}
-	break;
-    case ARROW_RIGHT:
-	if (row && buffer->cx < row->size)
-	{
-	    buffer->cx++;	    	    
-	}
-	else if (row && buffer->cx == row->size)
-	{
-	    buffer->cy++;
-	    buffer->cx = 0;
-	}
-	break;
-    case ARROW_UP:
-	if (buffer->cy != 0)
-	{
-	    buffer->cy--;	    
-	}
-	break;
-    case ARROW_DOWN:
-	if (buffer->cy < buffer->num_rows)
-	{
-	    buffer->cy++;	    
-	}
-	break;
-    }
-
-    row = (buffer->cy >= buffer->num_rows) ? NULL : &buffer->row[buffer->cy];
-    int rowlen = row ? row->size : 0;
-    if (buffer->cx > rowlen)
-    {
-	buffer->cx = rowlen;
-    }
-}
-
 void
 editor_set_cursor_position(const struct buffer* buffer, struct renderb* renderb)
 {
-    int y = buffer->cy - buffer->rowoff + 1;
-    int x = buffer->rx - buffer->coloff + 1;
+    int y = buffer->cp.y - buffer->rowoff + 1;
+    int x = buffer->cp.r - buffer->coloff + 1;
     char cur_pos[32];
     snprintf(cur_pos, sizeof(cur_pos), "\x1b[%d;%dH", y, x);
     renderb_append(renderb, cur_pos, strlen(cur_pos));
@@ -119,8 +22,8 @@ editor_draw_status_bar(const struct buffer* buffer, struct renderb* renderb)
 
     char status[80], rstatus[80];
     int len = snprintf(status, sizeof(status), "%.20s",
-		       buffer->file_name ? buffer->file_name : "[empty]", buffer->num_rows, buffer->cy);
-    int rlen = snprintf(rstatus, sizeof(rstatus), "%d/%d", buffer->cy + 1, buffer->num_rows);
+		       buffer->file_name ? buffer->file_name : "[empty]");
+    int rlen = snprintf(rstatus, sizeof(rstatus), "%d/%d", buffer->cp.y + 1, buffer->num_rows);
 
     if (len > config.screencols)
     {
@@ -216,6 +119,15 @@ editor_draw_rows(const struct buffer* buffer, struct renderb* renderb)
     }
 }
 
+
+void
+editor_init()
+{
+    enable_raw_mode();
+    get_window_size();
+    config.screenrows -= 2;
+}
+
 struct buffer current_buffer = BUFFER_INIT;
 
 void
@@ -233,23 +145,14 @@ editor_open(const char* file_name)
 {
     free(current_buffer.file_name);
     current_buffer.file_name = strdup(file_name);
-
+    
     load_file(&current_buffer, file_name);
 }
 
 void
-editor_init()
+editor_draw_update()
 {
-    enable_raw_mode();
-    get_window_size();
-
-    config.screenrows -= 2;
-}
-
-void
-editor_refresh_screen()
-{
-    editor_scroll(&current_buffer);
+    buffer_scroll_update(&current_buffer);
     
     struct renderb renderb = RENDERB_INIT;
 
@@ -267,8 +170,60 @@ editor_refresh_screen()
     renderb_free(&renderb);
 }
 
+static
 void
-editor_process_keys()
+editor_move_cursor(struct buffer* buffer, int key)
+{
+    struct buffer_row* row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y]; 
+    
+    switch (key)
+    {
+    case ARROW_LEFT:
+	if (buffer->cp.x != 0)
+	{
+	    buffer->cp.x--;	    
+	}
+	else if (buffer->cp.y > 0)
+	{
+	    buffer->cp.y--;
+	    buffer->cp.x = buffer->row[buffer->cp.y].size;
+	}
+	break;
+    case ARROW_RIGHT:
+	if (row && buffer->cp.x < row->size)
+	{
+	    buffer->cp.x++;	    	    
+	}
+	else if (row && buffer->cp.x == row->size)
+	{
+	    buffer->cp.y++;
+	    buffer->cp.x = 0;
+	}
+	break;
+    case ARROW_UP:
+	if (buffer->cp.y != 0)
+	{
+	    buffer->cp.y--;	    
+	}
+	break;
+    case ARROW_DOWN:
+	if (buffer->cp.y < buffer->num_rows)
+	{
+	    buffer->cp.y++;	    
+	}
+	break;
+    }
+
+    row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y];
+    int rowlen = row ? row->size : 0;
+    if (buffer->cp.x > rowlen)
+    {
+	buffer->cp.x = rowlen;
+    }
+}
+
+void
+editor_input_update()
 {
     int c = editor_read_key();
     switch(c)
@@ -285,12 +240,12 @@ editor_process_keys()
 	break;
 
     case HOME_KEY:
-	current_buffer.cx = 0;
+	current_buffer.cp.x = 0;
 	break;
     case END_KEY:
-	if (current_buffer.cy < current_buffer.num_rows)
+	if (current_buffer.cp.y < current_buffer.num_rows)
 	{
-	    current_buffer.cx = current_buffer.row[current_buffer.cy].size;	    
+	    current_buffer.cp.x = current_buffer.row[current_buffer.cp.y].size;	    
 	}
 	break;
 	
@@ -299,14 +254,14 @@ editor_process_keys()
     {
 	if (c == PAGE_UP)
 	{
-	    current_buffer.cy = current_buffer.rowoff;
+	    current_buffer.cp.y = current_buffer.rowoff;
 	}
 	else if (c == PAGE_DOWN)
 	{
-	    current_buffer.cy = current_buffer.rowoff + config.screenrows - 1;
-	    if (current_buffer.cy > current_buffer.num_rows)
+	    current_buffer.cp.y = current_buffer.rowoff + config.screenrows - 1;
+	    if (current_buffer.cp.y > current_buffer.num_rows)
 	    {
-		current_buffer.cy = current_buffer.num_rows;
+		current_buffer.cp.y = current_buffer.num_rows;
 	    }
 	}
 

@@ -10,10 +10,11 @@ int main(int argc, char *argv[])
     }
 
     editor_set_status_message("HELP: Ctrl-q to quit");
+
     while(1)
     {
-	editor_refresh_screen();
-	editor_process_keys();
+	editor_draw_update();
+	editor_input_update();
     }
 
     return 0;
