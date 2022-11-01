@@ -7,6 +7,8 @@ struct cur_pos {
     int x;
     int y;
     int r;
+    int rowoff;
+    int coloff;
 };
 
 struct buffer_row
@@ -21,18 +23,14 @@ struct buffer
 {
     struct cur_pos cp;
     int num_rows;
-    int rowoff;
-    int coloff;
     char* file_name;
     time_t status_message_time;
     char status_message[80];
     struct buffer_row *row;
 };
 
-#define BUFFER_INIT {.cp = {.x=0,.y=0,.r=0},	\
+#define BUFFER_INIT {.cp = {.x=0,.y=0,.r=0,.coloff = 0,.rowoff=0},	\
 	    .num_rows = 0,\
-	    .rowoff = 0, \
-	    .coloff= 0, \
 	    .file_name = NULL, \
 	    .status_message_time = 0,\
 	    .status_message = {'\0'}, \

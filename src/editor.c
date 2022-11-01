@@ -2,23 +2,24 @@
 #include "sys.h"
 #include "renderb.h"
 #include "input.h"
+#include "str.h"
 
 extern struct config config;
 
 void
-editor_set_cursor_position(const struct buffer* buffer, struct renderb* renderb)
+editor_set_cursor_position(const struct buffer* buffer, struct str* renderb)
 {
-    int y = buffer->cp.y - buffer->rowoff + 1;
-    int x = buffer->cp.r - buffer->coloff + 1;
+    int y = buffer->cp.y - buffer->cp.rowoff + 1;
+    int x = buffer->cp.r - buffer->cp.coloff + 1;
     char cur_pos[32];
     snprintf(cur_pos, sizeof(cur_pos), "\x1b[%d;%dH", y, x);
-    renderb_append(renderb, cur_pos, strlen(cur_pos));
+    str_append_raw(renderb, cur_pos, strlen(cur_pos));
 }
 
 void
-editor_draw_status_bar(const struct buffer* buffer, struct renderb* renderb)
+editor_draw_status_bar(const struct buffer* buffer, struct str* renderb)
 {
-    renderb_append(renderb, "\x1b[7m", 4);
+    str_append_raw(renderb, "\x1b[7m", 4);
 
     char status[80], rstatus[80];
     int len = snprintf(status, sizeof(status), "%.20s",
@@ -30,28 +31,29 @@ editor_draw_status_bar(const struct buffer* buffer, struct renderb* renderb)
 	len = config.screencols;
     }
 
-    renderb_append(renderb, status, len);
+    str_append_raw(renderb, status, len);
     while(len < config.screencols)
     {
 	if (config.screencols - len == rlen)
 	{
-	    renderb_append(renderb, rstatus, rlen);
+	    str_append_raw(renderb, rstatus, rlen);
 	    break;
 	}
 	else
 	{
-	    renderb_append(renderb, " ", 1);
+	    str_append_raw(renderb, " ", 1);
 	    len++;
 	}
     }
 
-    renderb_append(renderb, "\x1b[m", 3);
-    renderb_append(renderb, "\r\n", 2);
+    str_append_raw(renderb, "\x1b[m", 3);
+    str_append_raw(renderb, "\r\n", 2);
 }
 
-void editor_draw_status_message(const struct buffer* buffer, struct renderb* renderb)
+void
+editor_draw_status_message(const struct buffer* buffer, struct str* renderb)
 {
-    renderb_append(renderb, "\x1b[K", 3);
+    str_append_raw(renderb, "\x1b[K", 3);
     int meslen = strlen(buffer->status_message);
 
     if (meslen > config.screencols){
@@ -60,16 +62,16 @@ void editor_draw_status_message(const struct buffer* buffer, struct renderb* ren
 
     if (meslen && time(NULL) - buffer->status_message_time < 5)
     {
-	renderb_append(renderb, buffer->status_message, meslen);	
+	str_append_raw(renderb, buffer->status_message, meslen);	
     }
 }
 
 void
-editor_draw_rows(const struct buffer* buffer, struct renderb* renderb)
+editor_draw_rows(const struct buffer* buffer, struct str* renderb)
 {
     for(int y=0; y<config.screenrows; y++)
     {
-	int filerow = y + buffer->rowoff;
+	int filerow = y + buffer->cp.rowoff;
 	if (filerow >= buffer->num_rows) {
 	    if (buffer->num_rows == 0 && y == config.screenrows / 3)
 	    {
@@ -84,24 +86,24 @@ editor_draw_rows(const struct buffer* buffer, struct renderb* renderb)
 		int padding = (config.screencols - welcomelen) / 2;
 		if (padding)
 		{
-		    renderb_append(renderb, "~", 1);
+		    str_append_raw(renderb, "~", 1);
 		    padding--;
 		}
 
 		while (padding--)
 		{
-		    renderb_append(renderb, " ", 1);
+		    str_append_raw(renderb, " ", 1);
 		}
 
-		renderb_append(renderb, welcome, welcomelen);
+		str_append_raw(renderb, welcome, welcomelen);
 	    } else {
-		renderb_append(renderb, "~", 1);	    
+		str_append_raw(renderb, "~", 1);	    
 	    }    
 	}
 	else
 	{
 	    struct buffer_row row = buffer->row[filerow];
-	    int len = row.rsize - buffer->coloff;
+	    int len = row.rsize - buffer->cp.coloff;
 	    if (len < 0)
 	    {
 		len = 0;
@@ -111,11 +113,11 @@ editor_draw_rows(const struct buffer* buffer, struct renderb* renderb)
 		len = config.screencols;
 	    }
 	    
-	    renderb_append(renderb, &row.render[buffer->coloff], len);
+	    str_append_raw(renderb, &row.render[buffer->cp.coloff], len);
 	}
 	
-	renderb_append(renderb, "\x1b[K", 3);
-	renderb_append(renderb, "\r\n", 2);
+	str_append_raw(renderb, "\x1b[K", 3);
+	str_append_raw(renderb, "\r\n", 2);
     }
 }
 
@@ -154,20 +156,20 @@ editor_draw_update()
 {
     buffer_scroll_update(&current_buffer);
     
-    struct renderb renderb = RENDERB_INIT;
+    struct str renderb = STR_INIT;
 
-    renderb_append(&renderb, "\x1b[?25l", 6);
-    renderb_append(&renderb, "\x1b[H", 3);
+    str_append_raw(&renderb, "\x1b[?25l", 6);
+    str_append_raw(&renderb, "\x1b[H", 3);
 
     editor_draw_rows(&current_buffer, &renderb);
     editor_draw_status_bar(&current_buffer, &renderb);
     editor_draw_status_message(&current_buffer, &renderb);
     editor_set_cursor_position(&current_buffer, &renderb);
     
-    renderb_append(&renderb, "\x1b[?25h", 6);
+    str_append_raw(&renderb, "\x1b[?25h", 6);
 
-    renderb_flush(&renderb);
-    renderb_free(&renderb);
+    render_flush(renderb);
+    str_deinit(&renderb);
 }
 
 static
@@ -254,11 +256,11 @@ editor_input_update()
     {
 	if (c == PAGE_UP)
 	{
-	    current_buffer.cp.y = current_buffer.rowoff;
+	    current_buffer.cp.y = current_buffer.cp.rowoff;
 	}
 	else if (c == PAGE_DOWN)
 	{
-	    current_buffer.cp.y = current_buffer.rowoff + config.screenrows - 1;
+	    current_buffer.cp.y = current_buffer.cp.rowoff + config.screenrows - 1;
 	    if (current_buffer.cp.y > current_buffer.num_rows)
 	    {
 		current_buffer.cp.y = current_buffer.num_rows;

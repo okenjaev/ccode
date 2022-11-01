@@ -69,22 +69,22 @@ buffer_scroll_update(struct buffer* buffer)
 	buffer->cp.r = buffer_row_cx_to_rx(&buffer->row[buffer->cp.y], buffer->cp.x);
     }
 
-    if (buffer->cp.y < buffer->rowoff)
+    if (buffer->cp.y < buffer->cp.rowoff)
     {
-	buffer->rowoff = buffer->cp.y;
+	buffer->cp.rowoff = buffer->cp.y;
     }
 
-    if (buffer->cp.y >= buffer->rowoff + config.screenrows)
+    if (buffer->cp.y >= buffer->cp.rowoff + config.screenrows)
     {
-	buffer->rowoff = buffer->cp.y - config.screenrows + 1;
+	buffer->cp.rowoff = buffer->cp.y - config.screenrows + 1;
     }
 
-    if (buffer->cp.r < buffer->coloff) {
-	buffer->coloff = buffer->cp.r;
+    if (buffer->cp.r < buffer->cp.coloff) {
+	buffer->cp.coloff = buffer->cp.r;
     }
     
-    if (buffer->cp.r >= buffer->coloff + config.screencols) {
-	buffer->coloff = buffer->cp.r - config.screencols + 1;
+    if (buffer->cp.r >= buffer->cp.coloff + config.screencols) {
+	buffer->cp.coloff = buffer->cp.r - config.screencols + 1;
     }
 }
 

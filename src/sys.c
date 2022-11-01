@@ -1,6 +1,7 @@
 #include "sys.h"
 #include "renderb.h"
 #include "buffer.h"
+#include "str.h"
 
 struct config config;
 
@@ -56,11 +57,11 @@ die(const char* s)
 void
 restore()
 {
-    struct renderb renderb = RENDERB_INIT;
-    renderb_append(&renderb, "\x1b[2J", 4);
-    renderb_append(&renderb, "\x1b[H", 3);
-    renderb_flush(&renderb);
-    renderb_free(&renderb);    
+    struct str renderb = STR_INIT;
+    str_append_raw(&renderb, "\x1b[2J", 4);
+    str_append_raw(&renderb, "\x1b[H", 3);
+    render_flush(renderb);
+    str_deinit(&renderb);    
 }
 
 void
@@ -70,16 +71,16 @@ get_window_size()
 
     if (1 || ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0)
     {
-	struct renderb renderb = RENDERB_INIT;
-	renderb_append(&renderb, "\x1b[999C\x1b[999B", 12);
-	if (renderb_flush(&renderb) != 12)
+	struct str renderb = STR_INIT;
+	str_append_raw(&renderb, "\x1b[999C\x1b[999B", 12);
+	if (render_flush(renderb) != 12)
 	{
-	    renderb_free(&renderb);
+	    str_deinit(&renderb);
 	    die("get_window_size");
 	}
 	else
 	{
-	    renderb_free(&renderb);
+	    str_deinit(&renderb);
 	}
 	
         get_cursor_position(&config.screenrows, &config.screencols);
