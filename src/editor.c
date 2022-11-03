@@ -22,8 +22,8 @@ editor_draw_status_bar(const struct buffer* buffer, struct str* renderb)
     str_append_raw(renderb, "\x1b[7m", 4);
 
     char status[80], rstatus[80];
-    int len = snprintf(status, sizeof(status), "%.20s",
-		       buffer->file_name ? buffer->file_name : "[empty]");
+    int len = snprintf(status, sizeof(status), "%.20s %s",
+		       buffer->file_name ? buffer->file_name : "[empty]", buffer->dirty ? "(modified)" : "");
     int rlen = snprintf(rstatus, sizeof(rstatus), "%d/%d", buffer->cp.y + 1, buffer->num_rows);
     
     if (len > config.screencols)
@@ -102,7 +102,7 @@ editor_draw_rows(const struct buffer* buffer, struct str* renderb)
 	}
 	else
 	{
-	    struct buffer_row row = buffer->row[filerow];
+	    struct row row = buffer->row[filerow];
 	    int len = row.rsize - buffer->cp.coloff;
 	    if (len < 0)
 	    {
@@ -142,6 +142,60 @@ editor_set_status_message(const char* fmt, ...)
     current_buffer.status_message_time = time(NULL);
 }
 
+struct str
+editor_buffer_to_string(const struct buffer* buffer)
+{
+    struct str res = STR_INIT;
+
+    for (int i =0; i < buffer->num_rows; i++)
+    {
+	res.size = buffer->row[i].size + 1;
+    }
+
+    res.data = malloc(res.size * sizeof(char));
+    char* it = res.data;
+    for (int i =0; i< buffer->num_rows; i++)
+    {
+	memcpy(it, buffer->row[i].data, buffer->row[i].size);
+	it += buffer->row[i].size;
+	*it = '\n';
+	it++;
+    }
+    
+    return res;
+}
+
+void
+editor_save(struct buffer* buffer)
+{
+    if (buffer->file_name == NULL)
+    {
+	return;
+    }
+
+    struct str buffer_str = editor_buffer_to_string(buffer);
+
+    int fd = open(buffer->file_name, O_RDWR | O_CREAT, 0644);
+    if (fd != -1)
+    {
+	if (ftruncate(fd, buffer_str.size) != -1)
+	{
+	    if (write(fd, buffer_str.data, buffer_str.size) == buffer_str.size)
+	    {
+		close(fd);
+		editor_set_status_message("%d bytes has been saved to disk", buffer_str.size);
+		str_deinit(&buffer_str);	
+		buffer->dirty = 0;
+		return;
+	    }
+	}
+	close(fd);
+    }
+
+    str_deinit(&buffer_str);
+    editor_set_status_message("Error: Can't save file %s", strerror(errno));
+}
+
 void
 editor_open(const char* file_name)
 {
@@ -149,6 +203,7 @@ editor_open(const char* file_name)
     current_buffer.file_name = strdup(file_name);
     
     load_file(&current_buffer, file_name);
+    current_buffer.dirty = 0;
 }
 
 void
@@ -174,9 +229,38 @@ editor_draw_update()
 
 static
 void
+editor_insert_char(struct buffer* buffer, int c)
+{
+    if (buffer->cp.y == buffer->num_rows)
+    {
+	buffer_append_row(buffer, "", 0);
+    }
+
+    buffer_insert_char(buffer, buffer->cp.x, c);
+    buffer->cp.x++;
+}
+
+static
+void
+editor_remove_char(struct buffer* buffer)
+{
+    if (buffer->cp.y == buffer->num_rows)
+    {
+	return;
+    }
+
+    if (buffer->cp.x > 0)
+    {
+	buffer_remove_char(buffer, buffer->cp.x - 1);
+	buffer->cp.x--;
+    }
+}
+
+static
+void
 editor_move_cursor(struct buffer* buffer, int key)
 {
-    struct buffer_row* row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y]; 
+    struct row* row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y]; 
     
     switch (key)
     {
@@ -227,13 +311,45 @@ editor_move_cursor(struct buffer* buffer, int key)
 void
 editor_input_update()
 {
+    static int quit_times = FORME_QUIT_TIMES;
+    
     int c = editor_read_key();
     switch(c)
     {
+    case CTRL_KEY('l'):
+    case '\x1b':
+	break;
+
+    case CTRL_KEY('h'):
+    case BACKSPACE:
+    case DEL_KEY:
+	if (c == DEL_KEY)
+	{
+	    editor_move_cursor(&current_buffer, ARROW_RIGHT);
+	}
+	editor_remove_char(&current_buffer);
+	break;
+
+    case '\r':
+	break;
+
+    case CTRL_KEY('s'):
+	editor_save(&current_buffer);
+	break;
+
     case CTRL_KEY('q'):
+	if (current_buffer.dirty > 0 && quit_times > 0)
+	{
+	    editor_set_status_message("File has been changed. "
+				      "Please press Ctrl-Q %d to quit without saving", quit_times);
+	    quit_times--;
+	    return;
+	}
+
 	restore();
 	exit(0);
 	break;
+	
     case ARROW_UP:
     case ARROW_LEFT:
     case ARROW_RIGHT:
@@ -274,5 +390,9 @@ editor_input_update()
 	}
     }
     break;
+    default:
+	editor_insert_char(&current_buffer,c);
     }
+
+    quit_times = FORME_QUIT_TIMES;
 }

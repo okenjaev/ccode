@@ -15,9 +15,12 @@
 #include <string.h>
 #include <stdarg.h>
 #include <time.h>
+#include <fcntl.h>
 
 #define FORME_VERSION "0.0.1"
 #define CTRL_KEY(k) ((k) & 0x1f)
+
+#define FORME_QUIT_TIMES 3
 
 #define NUMBER_OF_SPACES_FOR_TAB 8
 
