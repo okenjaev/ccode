@@ -49,3 +49,4 @@ flycheck_*.el
 
 /bin-obj
 /bin
+/bin-debug

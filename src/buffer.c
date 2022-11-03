@@ -78,8 +78,7 @@ buffer_del_row(struct buffer* buffer, int index)
     }
 
     struct row* row = buffer->row + index;
-    row_clean(row);
-    
+    row_clean(row);    
     memmove(row, buffer->row + index + 1, sizeof(struct row) * (buffer->num_rows - index -1));
     buffer->num_rows--;
     buffer->dirty++;

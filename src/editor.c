@@ -149,7 +149,7 @@ editor_buffer_to_string(const struct buffer* buffer)
 
     for (int i =0; i < buffer->num_rows; i++)
     {
-	res.size = buffer->row[i].size + 1;
+	res.size += buffer->row[i].size + 1;
     }
 
     res.data = malloc(res.size * sizeof(char));
@@ -249,10 +249,25 @@ editor_remove_char(struct buffer* buffer)
 	return;
     }
 
+    if (buffer->cp.x == 0 && buffer->cp.y == 0)
+    {
+	return;
+    }
+
+    struct row *row = buffer->row + buffer->cp.y;
+    
     if (buffer->cp.x > 0)
     {
 	buffer_remove_char(buffer, buffer->cp.x - 1);
 	buffer->cp.x--;
+    }
+    else
+    {
+	buffer->cp.x = buffer->row[buffer->cp.y - 1].size;
+	row_append_string(&buffer->row[buffer->cp.y - 1], row->data, row->size);
+	buffer_del_row(buffer, buffer->cp.y);
+	buffer->cp.y--;
+	buffer->dirty++;
     }
 }
 
@@ -316,6 +331,10 @@ editor_input_update()
     int c = editor_read_key();
     switch(c)
     {
+    case CTRL_KEY('o'):
+	editor_open("../txt");
+	return;
+	
     case CTRL_KEY('l'):
     case '\x1b':
 	break;
