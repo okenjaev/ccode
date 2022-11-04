@@ -11,6 +11,9 @@ struct row
 };
 
 void
+row_init(struct row*);
+
+void
 row_update(struct row* row);
 
 void

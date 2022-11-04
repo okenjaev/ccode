@@ -44,7 +44,42 @@ str_buf_append(struct str_buf* str_buf, const struct str str)
     str_buf->size += str.size;
 }
 
+void
+str_buf_insert_char(struct str_buf* str_buf, int at_index, char c)
+{
+    if (str_buf->capacity < str_buf->size + 1)
+    {
+	str_buf->capacity += 1;
+	str_buf->data = realloc(str_buf->data, str_buf->capacity);  
+    }
+
+    memmove(str_buf->data + at_index + 1, str_buf->data + at_index, str_buf->size - at_index + 1);
+    str_buf->size++;
+    str_buf->data[at_index] = c;
+}
+
+void
+str_buf_remove_char(struct str_buf* str_buf, int at_index)
+{
+    memmove(str_buf->data + at_index, str_buf->data + at_index + 1, str_buf->size - at_index);
+    str_buf->size--;
+}
+
+void
+str_buf_append_raw(struct str_buf* str_buf, char* string, int len)
+{
+    if (str_buf->capacity < str_buf->size + len)
+    {
+	str_buf->capacity += len;
+	str_buf->data = realloc(str_buf->data, str_buf->capacity);
+    }
+
+    memcpy(str_buf->data + str_buf->size, string, len);
+    str_buf->size += len;    
+}
+
 /* str */
+
 struct str
 str_init_format(const char* fmt, ...)
 {

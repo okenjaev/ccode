@@ -1,0 +1,5 @@
+* Tasks:
+
+** TODO Row optimization with str_buf
+** TODO Move rendering to str_buf
+** TODO Hot keys

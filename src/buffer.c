@@ -62,16 +62,9 @@ buffer_append_row(struct buffer* buffer, int index, char* string, int len)
     memmove(buffer->row + index + 1, buffer->row + index, sizeof(struct row) * (buffer->num_rows - index));
     
     struct row *at = buffer->row + index;
-    
-    at->chars.size = len;
-    at->chars.data = malloc(len + 1);
-    memcpy(at->chars.data, string, len);
-    at->chars.data[len] = '\0';
-    at->render_chars.size = 0;
-    at->render_chars.data = NULL;
+    row_init(at);
+    row_append_string(at, string, len);
 
-    row_update(at);
-    
     buffer->num_rows++;
     buffer->dirty++;
 }
@@ -106,6 +99,7 @@ buffer_insert_char(struct buffer* buffer, int index, char c)
     {
 	buffer_append_row(buffer, buffer->num_rows, "", 0);
     }
+    
     struct row* row = buffer->row + buffer->cp.y;
     row_insert_char(row, index, c);
     buffer->cp.x++;
@@ -125,7 +119,6 @@ buffer_insert_row(struct buffer* buffer)
 	buffer_append_row(buffer, buffer->cp.y + 1, row->chars.data + buffer->cp.x, row->chars.size - buffer->cp.x);
 	row = buffer->row + buffer->cp.y;
 	row->chars.size = buffer->cp.x;
-	/* row->chars.data[row->size] = '\0'; */
 	row_update(row);
     }
     buffer->cp.y++;

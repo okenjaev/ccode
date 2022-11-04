@@ -1,6 +1,13 @@
 #include "row.h"
 
 void
+row_init(struct row* row)
+{
+    row->chars = str_buf_init(50);
+    str_buf_deinit(&row->render_chars);
+}
+
+void
 row_clean(struct row* row)
 {
     str_buf_deinit(&row->chars);
@@ -21,7 +28,7 @@ row_update(struct row* row)
     }
     
     str_buf_deinit(&row->render_chars);
-    row->render_chars = str_buf_init(row->chars.size + tabs * (FORME_NUMBER_OF_SPACES_FOR_TAB - 1) + 1);
+    row->render_chars = str_buf_init(row->chars.size + tabs * (FORME_NUMBER_OF_SPACES_FOR_TAB - 1));
 
     int idx = 0;
     for (int j = 0; j < row->chars.size; j++)
@@ -40,7 +47,6 @@ row_update(struct row* row)
 	}
     }
 
-    row->render_chars.data[idx] = '\0';
     row->render_chars.size = idx;
 }
 
@@ -69,8 +75,7 @@ row_remove_char(struct row* row, int index)
 	return;
     }
 
-    memmove(row->chars.data + index, row->chars.data+index+1, row->chars.size - index);
-    row->chars.size--;
+    str_buf_remove_char(&row->chars, index);
     row_update(row);
 }
 
@@ -82,19 +87,14 @@ row_insert_char(struct row* row, int index, char c)
 	index = row->chars.size;
     }
 
-    row->chars.data = realloc(row->chars.data, row->chars.size + 2);
-    memmove(row->chars.data + index + 1, row->chars.data + index, row->chars.size - index + 1);
-    row->chars.size++;
-    row->chars.data[index] = c;
+    str_buf_insert_char(&row->chars, index, c);
     row_update(row);
 }
 
 void
 row_append_string(struct row* row, char* string, int len)
 {
-    row->chars.data = realloc(row->chars.data, row->chars.size + len + 1);
-    memcpy(row->chars.data + row->chars.size, string, len);
-    row->chars.size += len;
-    row->chars.data[row->chars.size] = '\0';
+    /* row->chars.data = realloc(row->chars.data, row->chars.size + len); */
+    str_buf_append_raw(&row->chars, string, len);
     row_update(row);
 }

@@ -31,7 +31,18 @@ void
 str_buf_deinit(struct str_buf*);
 
 void
+str_buf_insert_char(struct str_buf* str_buf, int at_index, char c);
+
+void
+str_buf_remove_char(struct str_buf* str_buf, int at_index);
+
+void
 str_buf_append(struct str_buf*, const struct str);
+
+// TODO: temporary need to be removed
+void
+str_buf_append_raw(struct str_buf*, char* string, int len);
+
 /* str */
 
 struct str
