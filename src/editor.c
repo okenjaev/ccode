@@ -73,20 +73,20 @@ editor_draw_update()
 {
     buffer_cursor_update(&current_buffer);
     
-    struct str_buf renderb = str_buf_init(10);
+    struct str renderb = STR_INIT;
 
-    str_buf_append(&renderb, cstrn("\x1b[?25l", 6));
-    str_buf_append(&renderb, cstrn("\x1b[H", 3));
+    str_append_raw(&renderb, "\x1b[?25l", 6);
+    str_append_raw(&renderb, "\x1b[H", 3);
 
-    /* render_draw_rows(&current_buffer, &renderb); */
-    /* render_draw_status_bar(&current_buffer, &renderb); */
-    /* render_draw_status_message(&current_buffer, &renderb); */
-    /* render_set_cursor_position(&current_buffer, &renderb); */
+    render_draw_rows(&current_buffer, &renderb);
+    render_draw_status_bar(&current_buffer, &renderb);
+    render_draw_status_message(&current_buffer, &renderb);
+    render_set_cursor_position(&current_buffer, &renderb);
     
-    str_buf_append(&renderb, cstrn("\x1b[?25h", 6));
+    str_append_raw(&renderb, "\x1b[?25h", 6);
 
-    /* render_flush(str_buf_str(renderb)); */
-    str_buf_deinit(&renderb);
+    render_flush(renderb);
+    str_deinit(&renderb);
 }
 
 void

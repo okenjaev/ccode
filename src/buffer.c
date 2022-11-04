@@ -63,12 +63,12 @@ buffer_append_row(struct buffer* buffer, int index, char* string, int len)
     
     struct row *at = buffer->row + index;
     
-    at->size = len;
-    at->data = malloc(len + 1);
-    memcpy(at->data, string, len);
-    at->data[len] = '\0';
-    at->rsize = 0;
-    at->render = NULL;
+    at->chars.size = len;
+    at->chars.data = malloc(len + 1);
+    memcpy(at->chars.data, string, len);
+    at->chars.data[len] = '\0';
+    at->render_chars.size = 0;
+    at->render_chars.data = NULL;
 
     row_update(at);
     
@@ -83,15 +83,15 @@ buffer_serialize(const struct buffer* buffer)
 
     for (int i =0; i < buffer->num_rows; i++)
     {
-	res.size += buffer->row[i].size + 1;
+	res.size += buffer->row[i].chars.size + 1;
     }
 
     res.data = malloc(res.size * sizeof(char));
     char* it = res.data;
     for (int i =0; i< buffer->num_rows; i++)
     {
-	memcpy(it, buffer->row[i].data, buffer->row[i].size);
-	it += buffer->row[i].size;
+	memcpy(it, buffer->row[i].chars.data, buffer->row[i].chars.size);
+	it += buffer->row[i].chars.size;
 	*it = '\n';
 	it++;
     }
@@ -122,10 +122,10 @@ buffer_insert_row(struct buffer* buffer)
     else
     {
 	struct row *row = buffer->row + buffer->cp.y;
-	buffer_append_row(buffer, buffer->cp.y + 1, row->data + buffer->cp.x, row->size - buffer->cp.x);
+	buffer_append_row(buffer, buffer->cp.y + 1, row->chars.data + buffer->cp.x, row->chars.size - buffer->cp.x);
 	row = buffer->row + buffer->cp.y;
-	row->size = buffer->cp.x;
-	row->data[row->size] = '\0';
+	row->chars.size = buffer->cp.x;
+	/* row->chars.data[row->size] = '\0'; */
 	row_update(row);
     }
     buffer->cp.y++;
@@ -148,15 +148,15 @@ buffer_move_cursor(struct buffer* buffer, int key)
 	else if (buffer->cp.y > 0)
 	{
 	    buffer->cp.y--;
-	    buffer->cp.x = buffer->row[buffer->cp.y].size;
+	    buffer->cp.x = buffer->row[buffer->cp.y].chars.size;
 	}
 	break;
     case ARROW_RIGHT:
-	if (row && buffer->cp.x < row->size)
+	if (row && buffer->cp.x < row->chars.size)
 	{
 	    buffer->cp.x++;	    	    
 	}
-	else if (row && buffer->cp.x == row->size)
+	else if (row && buffer->cp.x == row->chars.size)
 	{
 	    buffer->cp.y++;
 	    buffer->cp.x = 0;
@@ -177,7 +177,7 @@ buffer_move_cursor(struct buffer* buffer, int key)
     }
 
     row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y];
-    int rowlen = row ? row->size : 0;
+    int rowlen = row ? row->chars.size : 0;
     if (buffer->cp.x > rowlen)
     {
 	buffer->cp.x = rowlen;
@@ -208,8 +208,8 @@ buffer_remove_char(struct buffer* buffer)
     }
     else
     {
-	buffer->cp.x = buffer->row[buffer->cp.y - 1].size;
-	row_append_string(&buffer->row[buffer->cp.y - 1], row->data, row->size);
+	buffer->cp.x = buffer->row[buffer->cp.y - 1].chars.size;
+	row_append_string(&buffer->row[buffer->cp.y - 1], row->chars.data, row->chars.size);
 	buffer_delete_row(buffer, buffer->cp.y);
 	buffer->cp.y--;
 	buffer->dirty++;

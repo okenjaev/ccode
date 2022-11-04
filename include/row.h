@@ -2,13 +2,12 @@
 #define ROW_H
 
 #include "common.h"
+#include "str.h"
 
 struct row
 {
-    int size;
-    int rsize;
-    char* data;
-    char* render;
+    struct str_buf chars;
+    struct str_buf render_chars;
 };
 
 void
