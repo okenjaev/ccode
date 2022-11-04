@@ -2,7 +2,9 @@
 #define BUFFER_H
 
 #include "common.h"
-#include "row.h"
+
+struct row;
+struct str;
 
 struct cur_pos {
     int x;
@@ -31,22 +33,34 @@ struct buffer
 	    .status_message = {'\0'},					\
 	    .row = NULL}
 
-void
-buffer_append_row(struct buffer* buffer, char* string, int len);
+struct str
+buffer_serialize(const struct buffer* buffer);
 
 void
-buffer_scroll_update(struct buffer* buffer);
+buffer_append_row(struct buffer* buffer, int index, char* string, int len);
+
+void
+buffer_delete_row(struct buffer* buffer, int index);
+
+void
+buffer_insert_row(struct buffer* buffer);
+
+
+void
+buffer_cursor_update(struct buffer* buffer);
+
+void
+buffer_move_cursor(struct buffer* buffer, int key);
+
+
+void
+buffer_row_append_string(struct buffer* buffer);
 
 void
 buffer_insert_char(struct buffer* buffer, int index, char c);
 
 void
-buffer_remove_char(struct buffer* buffer, int index);
+buffer_remove_char(struct buffer* buffer);
 
-void
-buffer_del_row(struct buffer* buffer, int index);
-
-void
-buffer_row_append_string(struct buffer* buffer);
 
 #endif /* BUFFER_H */

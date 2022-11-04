@@ -22,7 +22,7 @@ row_update(struct row* row)
     }
     
     free(row->render);
-    row->render = malloc(row->size + tabs * (NUMBER_OF_SPACES_FOR_TAB - 1) + 1);
+    row->render = malloc(row->size + tabs * (FORME_NUMBER_OF_SPACES_FOR_TAB - 1) + 1);
 
     int idx = 0;
     for (int j = 0; j < row->size; j++)
@@ -30,7 +30,7 @@ row_update(struct row* row)
 	if (row->data[j] == '\t')
 	{
 	    row->render[idx++] = ' ';
-	    while(idx % NUMBER_OF_SPACES_FOR_TAB != 0)
+	    while(idx % FORME_NUMBER_OF_SPACES_FOR_TAB != 0)
 	    {
 		row->render[idx++] = ' ';
 	    }
@@ -54,8 +54,8 @@ row_cx_to_rx(const struct row* row, int cx)
 	if (row->data[i] == '\t')
 	{
 	    rx +=
-		(NUMBER_OF_SPACES_FOR_TAB - 1) -
-		(rx % NUMBER_OF_SPACES_FOR_TAB);
+		(FORME_NUMBER_OF_SPACES_FOR_TAB - 1) -
+		(rx % FORME_NUMBER_OF_SPACES_FOR_TAB);
 	}
 	rx++;
     }

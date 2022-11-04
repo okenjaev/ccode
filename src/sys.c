@@ -148,7 +148,7 @@ load_file(struct buffer* buffer, const char* file_name)
 	    linelen--;
 	}
 	
-        buffer_append_row(buffer, line, linelen);
+        buffer_append_row(buffer, buffer->num_rows, line, linelen);
     }
 
     free(line);

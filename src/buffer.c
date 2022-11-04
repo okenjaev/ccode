@@ -1,11 +1,28 @@
 #include "buffer.h"
 #include "sys.h"
 #include "row.h"
+#include "input.h"
+#include "str.h"
 
 extern struct config config;
 
 void
-buffer_scroll_update(struct buffer* buffer)
+buffer_delete_row(struct buffer* buffer, int index)
+{
+    if (index < 0 || index >= buffer->num_rows)
+    {
+	return;
+    }
+
+    struct row* row = buffer->row + index;
+    row_clean(row);    
+    memmove(row, buffer->row + index + 1, sizeof(struct row) * (buffer->num_rows - index -1));
+    buffer->num_rows--;
+    buffer->dirty++;
+}
+
+void
+buffer_cursor_update(struct buffer* buffer)
 {
     buffer->cp.r = buffer->cp.x;
 
@@ -34,11 +51,17 @@ buffer_scroll_update(struct buffer* buffer)
 }
 
 void
-buffer_append_row(struct buffer* buffer, char* string, int len)
+buffer_append_row(struct buffer* buffer, int index, char* string, int len)
 {
-    buffer->row = realloc(buffer->row, sizeof(struct row) * (buffer->num_rows + 1));
+    if (index < 0 || index > buffer->num_rows)
+    {
+	return;	
+    }
 
-    struct row *at = &buffer->row[buffer->num_rows];
+    buffer->row = realloc(buffer->row, sizeof(struct row) * (buffer->num_rows + 1));
+    memmove(buffer->row + index + 1, buffer->row + index, sizeof(struct row) * (buffer->num_rows - index));
+    
+    struct row *at = buffer->row + index;
     
     at->size = len;
     at->data = malloc(len + 1);
@@ -53,33 +76,142 @@ buffer_append_row(struct buffer* buffer, char* string, int len)
     buffer->dirty++;
 }
 
+struct str
+buffer_serialize(const struct buffer* buffer)
+{
+    struct str res = STR_INIT;
+
+    for (int i =0; i < buffer->num_rows; i++)
+    {
+	res.size += buffer->row[i].size + 1;
+    }
+
+    res.data = malloc(res.size * sizeof(char));
+    char* it = res.data;
+    for (int i =0; i< buffer->num_rows; i++)
+    {
+	memcpy(it, buffer->row[i].data, buffer->row[i].size);
+	it += buffer->row[i].size;
+	*it = '\n';
+	it++;
+    }
+    
+    return res;
+}
+
 void
 buffer_insert_char(struct buffer* buffer, int index, char c)
 {
+    if (buffer->cp.y == buffer->num_rows)
+    {
+	buffer_append_row(buffer, buffer->num_rows, "", 0);
+    }
     struct row* row = buffer->row + buffer->cp.y;
     row_insert_char(row, index, c);
+    buffer->cp.x++;
     buffer->dirty++;
 }
 
 void
-buffer_remove_char(struct buffer* buffer, int index)
+buffer_insert_row(struct buffer* buffer)
 {
-    struct row* row = buffer->row + buffer->cp.y;
-    row_remove_char(row, index);
-    buffer->dirty++;
+    if (buffer->cp.x == 0)
+    {
+        buffer_append_row(buffer, buffer->cp.y, "", 0);
+    }
+    else
+    {
+	struct row *row = buffer->row + buffer->cp.y;
+	buffer_append_row(buffer, buffer->cp.y + 1, row->data + buffer->cp.x, row->size - buffer->cp.x);
+	row = buffer->row + buffer->cp.y;
+	row->size = buffer->cp.x;
+	row->data[row->size] = '\0';
+	row_update(row);
+    }
+    buffer->cp.y++;
+    buffer->cp.x = 0;
+}
+
+// TODO: remove int key and just receive the x and y
+void
+buffer_move_cursor(struct buffer* buffer, int key)
+{
+    struct row* row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y]; 
+    
+    switch (key)
+    {
+    case ARROW_LEFT:
+	if (buffer->cp.x != 0)
+	{
+	    buffer->cp.x--;	    
+	}
+	else if (buffer->cp.y > 0)
+	{
+	    buffer->cp.y--;
+	    buffer->cp.x = buffer->row[buffer->cp.y].size;
+	}
+	break;
+    case ARROW_RIGHT:
+	if (row && buffer->cp.x < row->size)
+	{
+	    buffer->cp.x++;	    	    
+	}
+	else if (row && buffer->cp.x == row->size)
+	{
+	    buffer->cp.y++;
+	    buffer->cp.x = 0;
+	}
+	break;
+    case ARROW_UP:
+	if (buffer->cp.y != 0)
+	{
+	    buffer->cp.y--;	    
+	}
+	break;
+    case ARROW_DOWN:
+	if (buffer->cp.y < buffer->num_rows)
+	{
+	    buffer->cp.y++;	    
+	}
+	break;
+    }
+
+    row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y];
+    int rowlen = row ? row->size : 0;
+    if (buffer->cp.x > rowlen)
+    {
+	buffer->cp.x = rowlen;
+    }
 }
 
 void
-buffer_del_row(struct buffer* buffer, int index)
+buffer_remove_char(struct buffer* buffer)
 {
-    if (index < 0 || index >= buffer->num_rows)
+    if (buffer->cp.y == buffer->num_rows)
     {
 	return;
     }
 
-    struct row* row = buffer->row + index;
-    row_clean(row);    
-    memmove(row, buffer->row + index + 1, sizeof(struct row) * (buffer->num_rows - index -1));
-    buffer->num_rows--;
-    buffer->dirty++;
+    if (buffer->cp.x == 0 && buffer->cp.y == 0)
+    {
+	return;
+    }
+
+    struct row *row = buffer->row + buffer->cp.y;
+    
+    if (buffer->cp.x > 0)
+    {
+	struct row* row = buffer->row + buffer->cp.y;
+	row_remove_char(row, buffer->cp.x - 1);
+	buffer->cp.x--;
+	buffer->dirty++;
+    }
+    else
+    {
+	buffer->cp.x = buffer->row[buffer->cp.y - 1].size;
+	row_append_string(&buffer->row[buffer->cp.y - 1], row->data, row->size);
+	buffer_delete_row(buffer, buffer->cp.y);
+	buffer->cp.y--;
+	buffer->dirty++;
+    }
 }
