@@ -32,7 +32,7 @@ str_buf_deinit(struct str_buf* buf)
 }
 
 void
-str_buf_append(struct str_buf* str_buf, const struct str str)
+str_buf_append(struct str_buf* str_buf, const struct str_buf str)
 {
     if (str_buf->capacity < str_buf->size + str.size)
     {
@@ -43,6 +43,20 @@ str_buf_append(struct str_buf* str_buf, const struct str str)
     memcpy(str_buf->data + str_buf->size, str.data, str.size);
     str_buf->size += str.size;
 }
+
+void
+str_buf_append_s(struct str_buf* str_buf, const struct str str)
+{
+    if (str_buf->capacity < str_buf->size + str.size)
+    {
+	str_buf->capacity += str.size;
+	str_buf->data = realloc(str_buf->data, str_buf->capacity);
+    }
+
+    memcpy(str_buf->data + str_buf->size, str.data, str.size);
+    str_buf->size += str.size;
+}
+
 
 void
 str_buf_insert_char(struct str_buf* str_buf, int at_index, char c)

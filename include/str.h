@@ -45,6 +45,10 @@ str_buf_resize(struct str_buf* str_buf,
 
 void
 str_buf_append(struct str_buf*,
+	       const struct str_buf);
+
+void
+str_buf_append_s(struct str_buf*,
 	       const struct str);
 
 // TODO: temporary need to be removed
