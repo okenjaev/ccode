@@ -1,7 +1,7 @@
 
 CC ?= gcc
-CFLAGS := -Iinclude/ 
-DBGFLAGS := -g -fsanitize=address
+CFLAGS := -Iinclude/ -O3
+DBGFLAGS := -g -fsanitize=address -Wall
 COBJFLAGS := $(CFLAGS) -c
 
 # path macros
