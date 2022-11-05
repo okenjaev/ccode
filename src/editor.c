@@ -75,15 +75,15 @@ editor_draw_update()
     
     struct str_buf renderb = STR_INIT;
 
-    str_buf_append_raw(&renderb, "\x1b[?25l", 6);
-    str_buf_append_raw(&renderb, "\x1b[H", 3);
+    str_buf_append_str(&renderb, cstrn("\x1b[?25l", 6));
+    str_buf_append_str(&renderb, cstrn("\x1b[H", 3));
 
     render_draw_rows(&current_buffer, &renderb);
     render_draw_status_bar(&current_buffer, &renderb);
     render_draw_status_message(&current_buffer, &renderb);
     render_set_cursor_position(&current_buffer, &renderb);
     
-    str_buf_append_raw(&renderb, "\x1b[?25h", 6);
+    str_buf_append_str(&renderb, cstrn("\x1b[?25h", 6));
 
     render_flush(renderb);
     str_buf_deinit(&renderb);

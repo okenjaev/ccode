@@ -45,7 +45,7 @@ str_buf_append(struct str_buf* str_buf, const struct str_buf str)
 }
 
 void
-str_buf_append_s(struct str_buf* str_buf, const struct str str)
+str_buf_append_str(struct str_buf* str_buf, const struct str str)
 {
     if (str_buf->capacity < str_buf->size + str.size)
     {

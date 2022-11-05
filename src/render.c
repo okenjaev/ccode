@@ -19,7 +19,7 @@ render_set_cursor_position(const struct buffer* buffer, struct str_buf* renderb)
 void
 render_draw_status_bar(const struct buffer* buffer, struct str_buf* renderb)
 {
-    str_buf_append_raw(renderb, "\x1b[7m", 4);
+    str_buf_append_str(renderb, cstrn("\x1b[7m", 4));
 
     char status[80], rstatus[80];
     int len = snprintf(status, sizeof(status), "%.20s %s",
@@ -46,14 +46,14 @@ render_draw_status_bar(const struct buffer* buffer, struct str_buf* renderb)
 	}
     }
 
-    str_buf_append_raw(renderb, "\x1b[m", 3);
-    str_buf_append_raw(renderb, "\r\n", 2);
+    str_buf_append_str(renderb, cstrn("\x1b[m", 3));
+    str_buf_append_str(renderb, cstrn("\r\n", 2));
 }
 
 void
 render_draw_status_message(const struct buffer* buffer, struct str_buf* renderb)
 {
-    str_buf_append_raw(renderb, "\x1b[K", 3);
+    str_buf_append_str(renderb, cstrn("\x1b[K", 3));
     int meslen = strlen(buffer->status_message);
 
     if (meslen > config.screencols){
@@ -86,18 +86,18 @@ render_draw_rows(const struct buffer* buffer, struct str_buf* renderb)
 		int padding = (config.screencols - welcomelen) / 2;
 		if (padding)
 		{
-		    str_buf_append_raw(renderb, "~", 1);
+		    str_buf_insert_char(renderb, renderb->size, '~');
 		    padding--;
 		}
 
 		while (padding--)
 		{
-		    str_buf_append_raw(renderb, " ", 1);
+		    str_buf_insert_char(renderb, renderb->size, ' ');
 		}
 
 		str_buf_append_raw(renderb, welcome, welcomelen);
 	    } else {
-		str_buf_append_raw(renderb, "~", 1);	    
+		str_buf_insert_char(renderb, renderb->size, '~');
 	    }    
 	}
 	else
@@ -114,11 +114,11 @@ render_draw_rows(const struct buffer* buffer, struct str_buf* renderb)
 	    }
 	    
 	    str_buf_append_raw(renderb,
-			   row->render_chars.data + buffer->cp.coloff, len);
+			       row->render_chars.data + buffer->cp.coloff, len);
 	}
 	
-	str_buf_append_raw(renderb, "\x1b[K", 3);
-	str_buf_append_raw(renderb, "\r\n", 2);
+	str_buf_append_str(renderb, cstrn("\x1b[K", 3));
+	str_buf_append_str(renderb, cstrn("\r\n", 2));
     }
 }
 
