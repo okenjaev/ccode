@@ -11,7 +11,7 @@ render_set_cursor_position(const struct buffer* buffer, struct str_buf* renderb)
 {
     int y = buffer->cp.y - buffer->cp.rowoff + 1;
     int x = buffer->cp.r - buffer->cp.coloff + 1;
-    char cur_pos[32];
+    char cur_pos[16];
     snprintf(cur_pos, sizeof(cur_pos), "\x1b[%d;%dH", y, x);
     str_buf_append_raw(renderb, cur_pos, strlen(cur_pos));
 }
@@ -41,7 +41,7 @@ render_draw_status_bar(const struct buffer* buffer, struct str_buf* renderb)
 	}
 	else
 	{
-	    str_buf_append_raw(renderb, " ", 1);
+	    str_buf_insert_char(renderb, renderb->size, ' ');
 	    len++;
 	}
     }

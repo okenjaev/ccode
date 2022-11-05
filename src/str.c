@@ -1,5 +1,7 @@
 #include "str.h"
 
+#define FOR_ME_MEMORY_ALLOCATION_FACTOR 1.5
+
 /* str buf */
 
 struct str
@@ -36,7 +38,7 @@ str_buf_append(struct str_buf* str_buf, const struct str_buf str)
 {
     if (str_buf->capacity < str_buf->size + str.size)
     {
-	str_buf->capacity += str.size;
+	str_buf->capacity += str.size * FOR_ME_MEMORY_ALLOCATION_FACTOR;
 	str_buf->data = realloc(str_buf->data, str_buf->capacity);
     }
 
@@ -49,7 +51,7 @@ str_buf_append_str(struct str_buf* str_buf, const struct str str)
 {
     if (str_buf->capacity < str_buf->size + str.size)
     {
-	str_buf->capacity += str.size;
+	str_buf->capacity += str.size * FOR_ME_MEMORY_ALLOCATION_FACTOR;
 	str_buf->data = realloc(str_buf->data, str_buf->capacity);
     }
 
@@ -57,17 +59,16 @@ str_buf_append_str(struct str_buf* str_buf, const struct str str)
     str_buf->size += str.size;
 }
 
-
 void
 str_buf_insert_char(struct str_buf* str_buf, int at_index, char c)
 {
     if (str_buf->capacity < str_buf->size + 1)
     {
-	str_buf->capacity += 1;
+	str_buf->capacity *= FOR_ME_MEMORY_ALLOCATION_FACTOR;
 	str_buf->data = realloc(str_buf->data, str_buf->capacity);  
     }
 
-    memmove(str_buf->data + at_index + 1, str_buf->data + at_index, str_buf->size - at_index + 1);
+    memmove(str_buf->data + at_index + 1, str_buf->data + at_index, str_buf->size - at_index);
     str_buf->size++;
     str_buf->data[at_index] = c;
 }
@@ -91,7 +92,7 @@ str_buf_append_raw(struct str_buf* str_buf, const char* string, int len)
 {
     if (str_buf->capacity < str_buf->size + len)
     {
-	str_buf->capacity += len;
+	str_buf->capacity += len * FOR_ME_MEMORY_ALLOCATION_FACTOR;
 	str_buf->data = realloc(str_buf->data, str_buf->capacity);
     }
 
@@ -127,3 +128,5 @@ str_deinit(struct str* str)
 {
     free(str->data);
 }
+
+#undef FOR_ME_MEMORY_ALLOCATION_FACTOR
