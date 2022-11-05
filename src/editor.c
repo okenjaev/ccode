@@ -35,7 +35,7 @@ editor_save(struct buffer* buffer)
 	return;
     }
 
-    struct str buffer_str = buffer_serialize(buffer);
+    struct str_buf buffer_str = buffer_serialize(buffer);
 
     int fd = open(buffer->file_name, O_RDWR | O_CREAT, 0644);
     if (fd != -1)
@@ -46,7 +46,7 @@ editor_save(struct buffer* buffer)
 	    {
 		close(fd);
 		editor_set_status_message("%d bytes has been saved to disk", buffer_str.size);
-		str_deinit(&buffer_str);	
+		str_buf_deinit(&buffer_str);	
 		buffer->dirty = 0;
 		return;
 	    }
@@ -54,7 +54,7 @@ editor_save(struct buffer* buffer)
 	close(fd);
     }
 
-    str_deinit(&buffer_str);
+    str_buf_deinit(&buffer_str);
     editor_set_status_message("Error: Can't save file %s", strerror(errno));
 }
 

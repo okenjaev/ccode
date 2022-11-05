@@ -33,7 +33,7 @@ struct buffer
 	    .status_message = {'\0'},					\
 	    .row = NULL}
 
-struct str
+struct str_buf
 buffer_serialize(const struct buffer* buffer);
 
 void

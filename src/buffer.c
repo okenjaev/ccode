@@ -72,27 +72,15 @@ buffer_append_row(struct buffer* buffer, int at_line, char* string, int len)
     buffer->dirty++;
 }
 
-struct str
+struct str_buf
 buffer_serialize(const struct buffer* buffer)
 {
-    struct str res = STR_INIT;
-
+    struct str_buf res = str_buf_init(50);
+    
     for (int i =0; i < buffer->num_rows; i++)
-
     {
-	res.size += buffer->row[i].chars.size + 1;
-    }
-
-    res.data = malloc(res.size * sizeof(char));
-    char* it = res.data;
-    for (int i =0; i< buffer->num_rows; i++)
-    {
-	memcpy(it,
-	       buffer->row[i].chars.data,
-	       buffer->row[i].chars.size);
-	it += buffer->row[i].chars.size;
-	*it = '\n';
-	it++;
+	str_buf_append_raw(&res, buffer->row[i].chars.data, buffer->row[i].chars.size);
+	str_buf_insert_char(&res, res.size, '\n');
     }
     
     return res;
