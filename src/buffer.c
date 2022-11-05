@@ -77,7 +77,7 @@ buffer_serialize(const struct buffer* buffer)
 {
     struct str_buf res = str_buf_init(50);
     
-    for (int i =0; i < buffer->num_rows; i++)
+    for (int i = 0; i < buffer->num_rows; i++)
     {
 	struct row* cur_row = buffer->row + i;
 	str_buf_append(&res, cur_row->chars);

@@ -54,22 +54,13 @@ str_buf_append_s(struct str_buf*,
 // TODO: temporary need to be removed
 void
 str_buf_append_raw(struct str_buf*,
-		   char* string,
+		   const char* string,
 		   int len);
 
 /* str */
 
 struct str
-str_init_format(const char* fmt, ...);
-
-struct str
 str_concat(struct str str, const struct str ano_str);
-
-void
-str_append(struct str* str, const struct str ano_str);
-
-void
-str_append_raw(struct str* str, const char* s, int len);
 
 struct str
 str_copy(const struct str str);
