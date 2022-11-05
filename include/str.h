@@ -6,13 +6,13 @@
 struct str {
     char* data;  
     int size;
-}; // immutable
+};  // immutable
 
 struct str_buf
 {
     char* data;
-    int capacity;
     int size;
+    int capacity;
 };  // mutable
 
 #define STR_INIT {.size = 0, .data = NULL}
@@ -31,17 +31,27 @@ void
 str_buf_deinit(struct str_buf*);
 
 void
-str_buf_insert_char(struct str_buf* str_buf, int at_index, char c);
+str_buf_insert_char(struct str_buf* str_buf,
+		    int at_index,
+		    char c);
 
 void
-str_buf_remove_char(struct str_buf* str_buf, int at_index);
+str_buf_remove_char(struct str_buf* str_buf,
+		    int at_index);
 
 void
-str_buf_append(struct str_buf*, const struct str);
+str_buf_resize(struct str_buf* str_buf,
+	       int size);
+
+void
+str_buf_append(struct str_buf*,
+	       const struct str);
 
 // TODO: temporary need to be removed
 void
-str_buf_append_raw(struct str_buf*, char* string, int len);
+str_buf_append_raw(struct str_buf*,
+		   char* string,
+		   int len);
 
 /* str */
 

@@ -14,10 +14,10 @@ void
 row_init(struct row*);
 
 void
-row_update(struct row* row);
+row_deinit(struct row* row);
 
 void
-row_clean(struct row* row);
+row_resize(struct row* row, int size);
 
 int
 row_cx_to_rx(const struct row* row, int cx);

@@ -66,6 +66,13 @@ str_buf_remove_char(struct str_buf* str_buf, int at_index)
 }
 
 void
+str_buf_resize(struct str_buf* str_buf,
+	       int size)
+{
+    str_buf->size = size;
+}
+
+void
 str_buf_append_raw(struct str_buf* str_buf, char* string, int len)
 {
     if (str_buf->capacity < str_buf->size + len)

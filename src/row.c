@@ -1,19 +1,6 @@
 #include "row.h"
 
-void
-row_init(struct row* row)
-{
-    row->chars = str_buf_init(50);
-    str_buf_deinit(&row->render_chars);
-}
-
-void
-row_clean(struct row* row)
-{
-    str_buf_deinit(&row->chars);
-    str_buf_deinit(&row->render_chars);
-}
-
+static
 void
 row_update(struct row* row)
 {
@@ -48,6 +35,27 @@ row_update(struct row* row)
     }
 
     row->render_chars.size = idx;
+}
+
+void
+row_init(struct row* row)
+{
+    row->chars = str_buf_init(50);
+    row->render_chars = str_buf_init(50);
+}
+
+void
+row_deinit(struct row* row)
+{
+    str_buf_deinit(&row->chars);
+    str_buf_deinit(&row->render_chars);
+}
+
+void
+row_resize(struct row* row, int size)
+{
+    str_buf_resize(&row->chars, size);
+    row_update(row);
 }
 
 int
@@ -94,7 +102,6 @@ row_insert_char(struct row* row, int index, char c)
 void
 row_append_string(struct row* row, char* string, int len)
 {
-    /* row->chars.data = realloc(row->chars.data, row->chars.size + len); */
     str_buf_append_raw(&row->chars, string, len);
     row_update(row);
 }

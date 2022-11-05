@@ -15,8 +15,8 @@ buffer_delete_row(struct buffer* buffer, int index)
     }
 
     struct row* row = buffer->row + index;
-    row_clean(row);    
-    memmove(row, buffer->row + index + 1, sizeof(struct row) * (buffer->num_rows - index -1));
+    row_deinit(row);    
+    memmove(row, row + 1, sizeof(struct row) * (buffer->num_rows - index -1));
     buffer->num_rows--;
     buffer->dirty++;
 }
@@ -51,20 +51,23 @@ buffer_cursor_update(struct buffer* buffer)
 }
 
 void
-buffer_append_row(struct buffer* buffer, int index, char* string, int len)
+buffer_append_row(struct buffer* buffer, int at_line, char* string, int len)
 {
-    if (index < 0 || index > buffer->num_rows)
+    if (at_line < 0 || at_line > buffer->num_rows)
     {
 	return;	
     }
 
-    buffer->row = realloc(buffer->row, sizeof(struct row) * (buffer->num_rows + 1));
-    memmove(buffer->row + index + 1, buffer->row + index, sizeof(struct row) * (buffer->num_rows - index));
+    buffer->row = realloc(buffer->row,
+			  sizeof(struct row) * (buffer->num_rows + 1));
     
-    struct row *at = buffer->row + index;
+    memmove(buffer->row + at_line + 1,
+	    buffer->row + at_line,
+	    sizeof(struct row) * (buffer->num_rows - at_line));
+
+    struct row *at = buffer->row + at_line;
     row_init(at);
     row_append_string(at, string, len);
-
     buffer->num_rows++;
     buffer->dirty++;
 }
@@ -75,6 +78,7 @@ buffer_serialize(const struct buffer* buffer)
     struct str res = STR_INIT;
 
     for (int i =0; i < buffer->num_rows; i++)
+
     {
 	res.size += buffer->row[i].chars.size + 1;
     }
@@ -83,7 +87,9 @@ buffer_serialize(const struct buffer* buffer)
     char* it = res.data;
     for (int i =0; i< buffer->num_rows; i++)
     {
-	memcpy(it, buffer->row[i].chars.data, buffer->row[i].chars.size);
+	memcpy(it,
+	       buffer->row[i].chars.data,
+	       buffer->row[i].chars.size);
 	it += buffer->row[i].chars.size;
 	*it = '\n';
 	it++;
@@ -118,8 +124,7 @@ buffer_insert_row(struct buffer* buffer)
 	struct row *row = buffer->row + buffer->cp.y;
 	buffer_append_row(buffer, buffer->cp.y + 1, row->chars.data + buffer->cp.x, row->chars.size - buffer->cp.x);
 	row = buffer->row + buffer->cp.y;
-	row->chars.size = buffer->cp.x;
-	row_update(row);
+	row_resize(row, buffer->cp.x);
     }
     buffer->cp.y++;
     buffer->cp.x = 0;

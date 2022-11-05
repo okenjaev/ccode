@@ -102,8 +102,8 @@ render_draw_rows(const struct buffer* buffer, struct str* renderb)
 	}
 	else
 	{
-	    struct row row = buffer->row[filerow];
-	    int len = row.render_chars.size - buffer->cp.coloff;
+	    struct row *row = buffer->row + filerow;
+	    int len = row->render_chars.size - buffer->cp.coloff;
 	    if (len < 0)
 	    {
 		len = 0;
@@ -113,7 +113,8 @@ render_draw_rows(const struct buffer* buffer, struct str* renderb)
 		len = config.screencols;
 	    }
 	    
-	    str_append_raw(renderb, &row.render_chars.data[buffer->cp.coloff], len);
+	    str_append_raw(renderb,
+			   row->render_chars.data + buffer->cp.coloff, len);
 	}
 	
 	str_append_raw(renderb, "\x1b[K", 3);
