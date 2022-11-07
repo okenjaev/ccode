@@ -15,7 +15,7 @@ struct str_buf
     int capacity;
 };  // mutable
 
-#define STR_INIT {.size = 0, .data = NULL}
+#define str_error (const struct str){.size = -1, .data = NULL}
 
 #define cstr(x) (const struct str){.data = x, .size = sizeof(x) - 1}
 #define cstrn(x, y) (const struct str){.data = x, .size = y}
@@ -60,7 +60,16 @@ str_buf_append_raw(struct str_buf*,
 /* str */
 
 struct str
+str_init(char* data, int size);
+
+struct str
 str_concat(struct str str, const struct str ano_str);
+
+struct str
+str_split(struct str* str, const struct str delim);
+
+int
+str_cmp(struct str str, struct str ano_str);
 
 struct str
 str_copy(const struct str str);

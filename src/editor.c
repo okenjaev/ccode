@@ -37,25 +37,17 @@ editor_save(struct buffer* buffer)
 
     struct str_buf buffer_str = buffer_serialize(buffer);
 
-    int fd = open(buffer->file_name, O_RDWR | O_CREAT, 0644);
-    if (fd != -1)
+    if (write_to_file(buffer->file_name, buffer_str))
     {
-	if (ftruncate(fd, buffer_str.size) != -1)
-	{
-	    if (write(fd, buffer_str.data, buffer_str.size) == buffer_str.size)
-	    {
-		close(fd);
-		editor_set_status_message("%d bytes has been saved to disk", buffer_str.size);
-		str_buf_deinit(&buffer_str);	
-		buffer->dirty = 0;
-		return;
-	    }
-	}
-	close(fd);
+	editor_set_status_message("%d bytes has been saved to disk", buffer_str.size);
+	str_buf_deinit(&buffer_str);	
+	buffer->dirty = 0;	
     }
-
-    str_buf_deinit(&buffer_str);
-    editor_set_status_message("Error: Can't save file %s", strerror(errno));
+    else
+    {
+	str_buf_deinit(&buffer_str);
+	editor_set_status_message("Error: Can't save file %s", strerror(errno));	
+    }
 }
 
 void
@@ -63,9 +55,16 @@ editor_open(const char* file_name)
 {
     free(current_buffer.file_name);
     current_buffer.file_name = strdup(file_name);
-    
-    load_file(&current_buffer, file_name);
+
+    struct str_buf str_buf = str_buf_init(100);
+    load_file(&str_buf, file_name);
     current_buffer.dirty = 0;
+
+    struct str builded = str_buf_str(str_buf);
+    str_buf_deinit(&str_buf);
+
+    buffer_fill(&current_buffer, builded);
+    str_deinit(&builded);
 }
 
 void
@@ -73,7 +72,7 @@ editor_draw_update()
 {
     buffer_cursor_update(&current_buffer);
     
-    struct str_buf renderb = STR_INIT;
+    struct str_buf renderb = str_buf_init(100);
 
     str_buf_append_str(&renderb, cstrn("\x1b[?25l", 6));
     str_buf_append_str(&renderb, cstrn("\x1b[H", 3));
@@ -82,7 +81,7 @@ editor_draw_update()
     render_draw_status_bar(&current_buffer, &renderb);
     render_draw_status_message(&current_buffer, &renderb);
     render_set_cursor_position(&current_buffer, &renderb);
-    
+
     str_buf_append_str(&renderb, cstrn("\x1b[?25h", 6));
 
     render_flush(renderb);
@@ -133,6 +132,7 @@ editor_input_update()
 	}
 
 	restore();
+	buffer_deinit(current_buffer);
 	exit(0);
 	break;
 	

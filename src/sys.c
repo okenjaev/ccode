@@ -58,8 +58,8 @@ void
 restore()
 {
     struct str_buf renderb = str_buf_init(10);
-    str_buf_append_raw(&renderb, "\x1b[2J", 4);
-    str_buf_append_raw(&renderb, "\x1b[H", 3);
+    str_buf_append_str(&renderb, cstrn("\x1b[2J", 4));
+    str_buf_append_str(&renderb, cstrn("\x1b[H", 3));
     render_flush(renderb);
     str_buf_deinit(&renderb);    
 }
@@ -71,8 +71,8 @@ get_window_size()
 
     if (1 || ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0)
     {
-	struct str_buf renderb = str_buf_init(10);
-	str_buf_append_raw(&renderb, "\x1b[999C\x1b[999B", 12);
+	struct str_buf renderb = str_buf_init(12);
+	str_buf_append_str(&renderb, cstrn("\x1b[999C\x1b[999B", 12));
 	if (render_flush(renderb) != 12)
 	{
 	    str_buf_deinit(&renderb);
@@ -127,30 +127,53 @@ enable_raw_mode()
 
 // TODO: Maybe refactoring
 void
-load_file(struct buffer* buffer, const char* file_name)
+load_file(struct str_buf* buf_str, const char* file_name)
 {
-    FILE *fp = fopen(file_name, "r");
-    if(!fp)
+    int fp = open(file_name, O_RDONLY);
+    if(fp == -1)
     {
 	die("file_open");
     }
 
-    char* line = NULL;
-    size_t linecap = 0;
-    ssize_t linelen = 0;
-
-    while ((linelen = getline(&line, &linecap, fp)) != -1)
+    int size = lseek(fp, 0, SEEK_END);
+    str_buf_resize(buf_str, size);
+    lseek(fp, 0, SEEK_SET);
+    
+    if (size != read(fp, buf_str->data, buf_str->size))
     {
-	
-	while(linelen > 0 && (line[linelen - 1] == '\n' ||
-			      line[linelen-1] == '\r'))
-	{
-	    linelen--;
-	}
-	
-        buffer_append_row(buffer, buffer->num_rows, line, linelen);
+	die("faylni oqi ololmadim");
     }
 
-    free(line);
-    fclose(fp);
+    /* while ((linelen = getline(&line, &linecap, fp)) != -1) */
+    /* {	 */
+    /* 	while(linelen > 0 && (line[linelen - 1] == '\n' || */
+    /* 			      line[linelen - 1] == '\r')) */
+    /* 	{ */
+    /* 	    linelen--; */
+    /* 	} */
+	
+    /*     buffer_append_row(buffer, buffer->num_rows, line, linelen); */
+    /* } */
+    /* free(line); */
+
+    close(fp);
+}
+
+int
+write_to_file(const char* file_name, struct str_buf buffer_str)
+{
+    int fd = open(file_name, O_RDWR | O_CREAT, 0644);
+    if (fd != -1)
+    {
+	if (ftruncate(fd, buffer_str.size) != -1)
+	{
+	    if (write(fd, buffer_str.data, buffer_str.size) == buffer_str.size)
+	    {
+		close(fd);
+		return 1;
+	    }
+	}
+	close(fd);
+    }
+    return 0;
 }

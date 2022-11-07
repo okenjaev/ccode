@@ -202,3 +202,30 @@ buffer_remove_char(struct buffer* buffer)
 	buffer->dirty++;
     }
 }
+
+void
+buffer_deinit(struct buffer buffer)
+{
+    free(buffer.file_name);
+    for (int i = buffer.num_rows - 1; i >= 0; i--)
+    {
+	row_deinit(i + buffer.row);
+    }
+    free(buffer.row);
+}
+
+void
+buffer_fill(struct buffer* buffer, struct str text)
+{
+    while(1)
+    {
+	struct str val = str_split(&text, cstr("\n")); 
+	if (val.size == -1)
+	{
+	    break;
+	}
+	
+	buffer_append_row(buffer, buffer->num_rows, val.data, val.size);
+	str_deinit(&val);
+    }
+}

@@ -64,7 +64,7 @@ str_buf_insert_char(struct str_buf* str_buf, int at_index, char c)
 {
     if (str_buf->capacity < str_buf->size + 1)
     {
-	str_buf->capacity *= FOR_ME_MEMORY_ALLOCATION_FACTOR;
+	str_buf->capacity += 5 * FOR_ME_MEMORY_ALLOCATION_FACTOR;
 	str_buf->data = realloc(str_buf->data, str_buf->capacity);  
     }
 
@@ -85,6 +85,12 @@ str_buf_resize(struct str_buf* str_buf,
 	       int size)
 {
     str_buf->size = size;
+    
+    if (str_buf->capacity < str_buf->size)
+    {
+	str_buf->capacity = str_buf->size;
+	str_buf->data = realloc(str_buf->data, str_buf->capacity);
+    }
 }
 
 void
@@ -103,6 +109,16 @@ str_buf_append_raw(struct str_buf* str_buf, const char* string, int len)
 /* str */
 
 struct str
+str_init(char* data, int size)
+{
+    struct str val;
+    val.size = size;
+    val.data = malloc(sizeof(char) * val.size);
+    memcpy(val.data, data, val.size);
+    return val;
+}
+
+struct str
 str_concat(struct str str, const struct str ano_str)
 {
     struct str res;
@@ -111,6 +127,50 @@ str_concat(struct str str, const struct str ano_str)
     memcpy(res.data, str.data, str.size);
     memcpy(res.data + str.size, ano_str.data, ano_str.size);
     return res;
+}
+
+struct str
+str_split(struct str* str, const struct str delim)
+{
+    int delimsize = delim.size;
+
+    int i =0;
+    while(i < str->size - delimsize)
+    {
+	char* at = i + str->data;
+	struct str temp = cstrn(at, delimsize);
+
+	if (str_cmp(temp, delim))
+	{
+	    struct str ret = str_init(str->data, i);
+	    str->size = str->size - (i + delimsize);
+	    memmove(str->data, i + delimsize + str->data, str->size);	    
+	    return ret;
+	}
+	
+	i++;
+    }
+
+    return str_error;
+}
+
+int
+str_cmp(struct str str, struct str ano_str)
+{
+    if (str.size != ano_str.size)
+    {
+	return 0;
+    }
+
+    for (int i=0; i<str.size; i++)
+    {
+	if (str.data[i] != ano_str.data[i])
+	{
+	    return 0;
+	}
+    }
+    
+    return 1;
 }
 
 struct str
@@ -127,6 +187,8 @@ void
 str_deinit(struct str* str)
 {
     free(str->data);
+    str->data = NULL;
+    str->size = 0;
 }
 
 #undef FOR_ME_MEMORY_ALLOCATION_FACTOR

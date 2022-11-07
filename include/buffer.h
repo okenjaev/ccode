@@ -62,5 +62,10 @@ buffer_insert_char(struct buffer* buffer, int index, char c);
 void
 buffer_remove_char(struct buffer* buffer);
 
+void
+buffer_deinit(struct buffer buffer);
+
+void
+buffer_fill(struct buffer* buffer, struct str text);
 
 #endif /* BUFFER_H */
