@@ -34,38 +34,36 @@ struct buffer
 	    .row = NULL}
 
 struct str_buf
-buffer_serialize(const struct buffer* buffer);
+buffer_serialize(const struct buffer*);
 
 void
-buffer_append_row(struct buffer* buffer, int index, char* string, int len);
+buffer_append_row(struct buffer*, int, struct str);
 
 void
-buffer_delete_row(struct buffer* buffer, int index);
+buffer_delete_row(struct buffer*, int);
 
 void
-buffer_insert_row(struct buffer* buffer);
-
-
-void
-buffer_cursor_update(struct buffer* buffer);
+buffer_insert_row(struct buffer*);
 
 void
-buffer_move_cursor(struct buffer* buffer, int key);
-
-
-void
-buffer_row_append_string(struct buffer* buffer);
+buffer_cursor_update(struct buffer*);
 
 void
-buffer_insert_char(struct buffer* buffer, int index, char c);
+buffer_move_cursor(struct buffer*, int);
 
 void
-buffer_remove_char(struct buffer* buffer);
+buffer_row_append_string(struct buffer*);
 
 void
-buffer_deinit(struct buffer buffer);
+buffer_insert_char(struct buffer*, int, char);
 
 void
-buffer_fill(struct buffer* buffer, struct str text);
+buffer_remove_char(struct buffer*);
+
+void
+buffer_deinit(struct buffer);
+
+void
+buffer_fill(struct buffer*, struct str);
 
 #endif /* BUFFER_H */

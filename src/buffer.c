@@ -13,7 +13,7 @@ buffer_delete_row(struct buffer* buffer, int index)
     {
 	return;
     }
-
+    
     struct row* row = buffer->row + index;
     row_deinit(row);    
     memmove(row, row + 1, sizeof(struct row) * (buffer->num_rows - index -1));
@@ -51,7 +51,7 @@ buffer_cursor_update(struct buffer* buffer)
 }
 
 void
-buffer_append_row(struct buffer* buffer, int at_line, char* string, int len)
+buffer_append_row(struct buffer* buffer, int at_line, struct str str)
 {
     if (at_line < 0 || at_line > buffer->num_rows)
     {
@@ -67,7 +67,7 @@ buffer_append_row(struct buffer* buffer, int at_line, char* string, int len)
 
     struct row *at = buffer->row + at_line;
     row_init(at);
-    row_append_string(at, string, len);
+    row_append_string(at, str);
     buffer->num_rows++;
     buffer->dirty++;
 }
@@ -92,7 +92,7 @@ buffer_insert_char(struct buffer* buffer, int index, char c)
 {
     if (buffer->cp.y == buffer->num_rows)
     {
-	buffer_append_row(buffer, buffer->num_rows, "", 0);
+	buffer_append_row(buffer, buffer->num_rows, cstr(""));
     }
     
     struct row* row = buffer->row + buffer->cp.y;
@@ -106,12 +106,12 @@ buffer_insert_row(struct buffer* buffer)
 {
     if (buffer->cp.x == 0)
     {
-        buffer_append_row(buffer, buffer->cp.y, "", 0);
+        buffer_append_row(buffer, buffer->cp.y, cstr(""));
     }
     else
     {
 	struct row *row = buffer->row + buffer->cp.y;
-	buffer_append_row(buffer, buffer->cp.y + 1, row->chars.data + buffer->cp.x, row->chars.size - buffer->cp.x);
+	buffer_append_row(buffer, buffer->cp.y + 1, cstrn(row->chars.data + buffer->cp.x, row->chars.size - buffer->cp.x));
 	row = buffer->row + buffer->cp.y;
 	row_resize(row, buffer->cp.x);
     }
@@ -196,7 +196,7 @@ buffer_remove_char(struct buffer* buffer)
     else
     {
 	buffer->cp.x = buffer->row[buffer->cp.y - 1].chars.size;
-	row_append_string(&buffer->row[buffer->cp.y - 1], row->chars.data, row->chars.size);
+	row_append_string(&buffer->row[buffer->cp.y - 1], cstrn(row->chars.data, row->chars.size));
 	buffer_delete_row(buffer, buffer->cp.y);
 	buffer->cp.y--;
 	buffer->dirty++;
@@ -225,7 +225,7 @@ buffer_fill(struct buffer* buffer, struct str text)
 	    break;
 	}
 	
-	buffer_append_row(buffer, buffer->num_rows, val.data, val.size);
+	buffer_append_row(buffer, buffer->num_rows, val);
 	str_deinit(&val);
     }
 }

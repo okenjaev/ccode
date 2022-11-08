@@ -100,8 +100,8 @@ row_insert_char(struct row* row, int index, char c)
 }
 
 void
-row_append_string(struct row* row, char* string, int len)
+row_append_string(struct row* row, struct str string)
 {
-    str_buf_append_raw(&row->chars, string, len);
+    str_buf_append_str(&row->chars, string);
     row_update(row);
 }

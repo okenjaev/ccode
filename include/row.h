@@ -29,6 +29,6 @@ void
 row_insert_char(struct row* row, int index, char c);
 
 void
-row_append_string(struct row* row, char* string, int len);
+row_append_string(struct row* row, struct str str);
 
 #endif /* ROW_H */
