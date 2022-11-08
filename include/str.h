@@ -3,11 +3,6 @@
 
 #include "common.h"
 
-struct str {
-    char* data;  
-    int size;
-};  // immutable
-
 struct str_buf
 {
     char* data;
@@ -15,14 +10,9 @@ struct str_buf
     int capacity;
 };  // mutable
 
-#define str_error (const struct str){.size = -1, .data = NULL}
-
-#define cstr(x) (const struct str){.data = x, .size = sizeof(x) - 1}
-#define cstrn(x, y) (const struct str){.data = x, .size = y}
-
-/* str buf */
-struct str
-str_buf_str(const struct str_buf);
+#define str_buf_nan (struct str_buf){.data = NULL, .size = -1}
+#define cstr(x) (struct str_buf){.data = x, .size = sizeof(x) - 1}
+#define cstrn(x, y) (struct str_buf){.data = x, .size = y}
 
 struct str_buf
 str_buf_init(int);
@@ -47,34 +37,14 @@ void
 str_buf_append(struct str_buf*,
 	       const struct str_buf);
 
-void
-str_buf_append_str(struct str_buf*,
-	       const struct str);
-
-// TODO: temporary need to be removed
-void
-str_buf_append_raw(struct str_buf*,
-		   const char* string,
-		   int len);
-
-/* str */
-
-struct str
-str_init(char* data, int size);
-
-struct str
-str_concat(struct str str, const struct str ano_str);
-
-struct str
-str_split(struct str* str, const struct str delim);
+struct str_buf
+str_buf_copy(const struct str_buf str);
 
 int
-str_cmp(struct str str, struct str ano_str);
+str_buf_cmp(struct str_buf str, struct str_buf ano_str);
 
-struct str
-str_copy(const struct str str);
+struct str_buf
+str_buf_split(struct str_buf* str, const struct str_buf delim);
 
-void
-str_deinit(struct str* str);
 
 #endif /* STR_H */

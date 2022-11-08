@@ -58,8 +58,8 @@ void
 restore()
 {
     struct str_buf renderb = str_buf_init(10);
-    str_buf_append_str(&renderb, cstrn("\x1b[2J", 4));
-    str_buf_append_str(&renderb, cstrn("\x1b[H", 3));
+    str_buf_append(&renderb, cstrn("\x1b[2J", 4));
+    str_buf_append(&renderb, cstrn("\x1b[H", 3));
     render_flush(renderb);
     str_buf_deinit(&renderb);    
 }
@@ -72,7 +72,7 @@ get_window_size()
     if (1 || ioctl(STDOUT_FILENO, TIOCGWINSZ, &ws) == -1 || ws.ws_col == 0)
     {
 	struct str_buf renderb = str_buf_init(12);
-	str_buf_append_str(&renderb, cstrn("\x1b[999C\x1b[999B", 12));
+	str_buf_append(&renderb, cstrn("\x1b[999C\x1b[999B", 12));
 	if (render_flush(renderb) != 12)
 	{
 	    str_buf_deinit(&renderb);

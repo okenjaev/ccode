@@ -4,7 +4,6 @@
 #include "common.h"
 
 struct row;
-struct str;
 
 struct cur_pos {
     int x;
@@ -37,7 +36,7 @@ struct str_buf
 buffer_serialize(const struct buffer*);
 
 void
-buffer_append_row(struct buffer*, int, struct str);
+buffer_append_row(struct buffer*, int, struct str_buf);
 
 void
 buffer_delete_row(struct buffer*, int);
@@ -64,6 +63,6 @@ void
 buffer_deinit(struct buffer);
 
 void
-buffer_fill(struct buffer*, struct str);
+buffer_fill(struct buffer*, struct str_buf);
 
 #endif /* BUFFER_H */

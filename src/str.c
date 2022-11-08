@@ -4,16 +4,6 @@
 
 /* str buf */
 
-struct str
-str_buf_str(const struct str_buf str_buf)
-{
-    struct str result;
-    result.size = str_buf.size;
-    result.data = malloc(sizeof(char) * result.size);
-    memcpy(result.data, str_buf.data, result.size);
-    return result;
-}
-
 struct str_buf
 str_buf_init(int capacity)
 {
@@ -24,30 +14,32 @@ str_buf_init(int capacity)
     return value;
 }
 
+struct str_buf
+str_buf_init_raw(char* data, int size)
+{
+    struct str_buf value;
+    value.capacity = size;
+    value.size = size;
+    value.data = malloc(sizeof(char) * value.capacity);
+
+    memcpy(value.data, data, value.size);
+    return value;
+}
 void
 str_buf_deinit(struct str_buf* buf)
 {
-    free(buf->data);
+    if (buf->capacity > 0)
+    {
+	free(buf->data);
+    }
+
     buf->data = NULL;
     buf->capacity = 0;
-    buf->size = 0;
+    buf->size = 0;	
 }
 
 void
 str_buf_append(struct str_buf* str_buf, const struct str_buf str)
-{
-    if (str_buf->capacity < str_buf->size + str.size)
-    {
-	str_buf->capacity += str.size * FOR_ME_MEMORY_ALLOCATION_FACTOR;
-	str_buf->data = realloc(str_buf->data, str_buf->capacity);
-    }
-
-    memcpy(str_buf->data + str_buf->size, str.data, str.size);
-    str_buf->size += str.size;
-}
-
-void
-str_buf_append_str(struct str_buf* str_buf, const struct str str)
 {
     if (str_buf->capacity < str_buf->size + str.size)
     {
@@ -93,44 +85,8 @@ str_buf_resize(struct str_buf* str_buf,
     }
 }
 
-void
-str_buf_append_raw(struct str_buf* str_buf, const char* string, int len)
-{
-    if (str_buf->capacity < str_buf->size + len)
-    {
-	str_buf->capacity += len * FOR_ME_MEMORY_ALLOCATION_FACTOR;
-	str_buf->data = realloc(str_buf->data, str_buf->capacity);
-    }
-
-    memcpy(str_buf->data + str_buf->size, string, len);
-    str_buf->size += len;    
-}
-
-/* str */
-
-struct str
-str_init(char* data, int size)
-{
-    struct str val;
-    val.size = size;
-    val.data = malloc(sizeof(char) * val.size);
-    memcpy(val.data, data, val.size);
-    return val;
-}
-
-struct str
-str_concat(struct str str, const struct str ano_str)
-{
-    struct str res;
-    res.size = str.size + ano_str.size;
-    res.data = malloc(sizeof(char) * res.size);
-    memcpy(res.data, str.data, str.size);
-    memcpy(res.data + str.size, ano_str.data, ano_str.size);
-    return res;
-}
-
-struct str
-str_split(struct str* str, const struct str delim)
+struct str_buf
+str_buf_split(struct str_buf* str, const struct str_buf delim)
 {
     int delimsize = delim.size;
 
@@ -138,11 +94,11 @@ str_split(struct str* str, const struct str delim)
     while(i < str->size - delimsize)
     {
 	char* at = i + str->data;
-	struct str temp = cstrn(at, delimsize);
+	struct str_buf temp = cstrn(at, delimsize);
 
-	if (str_cmp(temp, delim))
+	if (str_buf_cmp(temp, delim))
 	{
-	    struct str ret = str_init(str->data, i);
+	    struct str_buf ret = str_buf_init_raw(str->data, i);
 	    str->size = str->size - (i + delimsize);
 	    memmove(str->data, i + delimsize + str->data, str->size);	    
 	    return ret;
@@ -151,11 +107,11 @@ str_split(struct str* str, const struct str delim)
 	i++;
     }
 
-    return str_error;
+    return str_buf_nan;
 }
 
 int
-str_cmp(struct str str, struct str ano_str)
+str_buf_cmp(struct str_buf str, struct str_buf ano_str)
 {
     if (str.size != ano_str.size)
     {
@@ -173,22 +129,15 @@ str_cmp(struct str str, struct str ano_str)
     return 1;
 }
 
-struct str
-str_copy(const struct str str)
+struct str_buf
+str_buf_copy(const struct str_buf str)
 {
-    struct str res;
+    struct str_buf res;
     res.size = str.size;
+    res.capacity = str.capacity;
     res.data = malloc(sizeof(char) * res.size);
-    memcpy(res.data, str.data, res.size);
+    memcpy(res.data, str.data, res.capacity);
     return res;
-}
-
-void
-str_deinit(struct str* str)
-{
-    free(str->data);
-    str->data = NULL;
-    str->size = 0;
 }
 
 #undef FOR_ME_MEMORY_ALLOCATION_FACTOR

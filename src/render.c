@@ -13,13 +13,13 @@ render_set_cursor_position(const struct buffer* buffer, struct str_buf* renderb)
     int x = buffer->cp.r - buffer->cp.coloff + 1;
     char cur_pos[16];
     snprintf(cur_pos, sizeof(cur_pos), "\x1b[%d;%dH", y, x);
-    str_buf_append_raw(renderb, cur_pos, strlen(cur_pos));
+    str_buf_append(renderb, cstrn(cur_pos, strlen(cur_pos)));
 }
 
 void
 render_draw_status_bar(const struct buffer* buffer, struct str_buf* renderb)
 {
-    str_buf_append_str(renderb, cstrn("\x1b[7m", 4));
+    str_buf_append(renderb, cstrn("\x1b[7m", 4));
 
     char status[80], rstatus[80];
     int len = snprintf(status, sizeof(status), "%.20s %s",
@@ -31,12 +31,12 @@ render_draw_status_bar(const struct buffer* buffer, struct str_buf* renderb)
 	len = config.screencols;
     }
 
-    str_buf_append_raw(renderb, status, len);
+    str_buf_append(renderb, cstrn(status, len));
     while(len < config.screencols)
     {
 	if (config.screencols - len == rlen)
 	{
-	    str_buf_append_raw(renderb, rstatus, rlen);
+	    str_buf_append(renderb, cstrn(rstatus, rlen));
 	    break;
 	}
 	else
@@ -46,14 +46,14 @@ render_draw_status_bar(const struct buffer* buffer, struct str_buf* renderb)
 	}
     }
 
-    str_buf_append_str(renderb, cstrn("\x1b[m", 3));
-    str_buf_append_str(renderb, cstrn("\r\n", 2));
+    str_buf_append(renderb, cstrn("\x1b[m", 3));
+    str_buf_append(renderb, cstrn("\r\n", 2));
 }
 
 void
-render_draw_status_message(const struct buffer* buffer, struct str_buf* renderb)
+render_draw_status_message(struct buffer* buffer, struct str_buf* renderb)
 {
-    str_buf_append_str(renderb, cstrn("\x1b[K", 3));
+    str_buf_append(renderb, cstrn("\x1b[K", 3));
     int meslen = strlen(buffer->status_message);
 
     if (meslen > config.screencols){
@@ -62,7 +62,7 @@ render_draw_status_message(const struct buffer* buffer, struct str_buf* renderb)
 
     if (meslen && time(NULL) - buffer->status_message_time < 5)
     {
-	str_buf_append_raw(renderb, buffer->status_message, meslen);	
+	str_buf_append(renderb, cstrn(buffer->status_message, meslen));	
     }
 }
 
@@ -95,7 +95,7 @@ render_draw_rows(const struct buffer* buffer, struct str_buf* renderb)
 		    str_buf_insert_char(renderb, renderb->size, ' ');
 		}
 
-		str_buf_append_raw(renderb, welcome, welcomelen);
+		str_buf_append(renderb, cstrn(welcome, welcomelen));
 	    } else {
 		str_buf_insert_char(renderb, renderb->size, '~');
 	    }    
@@ -113,12 +113,12 @@ render_draw_rows(const struct buffer* buffer, struct str_buf* renderb)
 		len = config.screencols;
 	    }
 	    
-	    str_buf_append_raw(renderb,
-			       row->render_chars.data + buffer->cp.coloff, len);
+	    str_buf_append(renderb,
+			   cstrn(row->render_chars.data + buffer->cp.coloff, len));
 	}
 	
-	str_buf_append_str(renderb, cstrn("\x1b[K", 3));
-	str_buf_append_str(renderb, cstrn("\r\n", 2));
+	str_buf_append(renderb, cstrn("\x1b[K", 3));
+	str_buf_append(renderb, cstrn("\r\n", 2));
     }
 }
 

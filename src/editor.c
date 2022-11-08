@@ -58,13 +58,10 @@ editor_open(const char* file_name)
 
     struct str_buf str_buf = str_buf_init(100);
     load_file(&str_buf, file_name);
-    current_buffer.dirty = 0;
-
-    struct str builded = str_buf_str(str_buf);
+    buffer_fill(&current_buffer, str_buf);
     str_buf_deinit(&str_buf);
 
-    buffer_fill(&current_buffer, builded);
-    str_deinit(&builded);
+    current_buffer.dirty = 0;
 }
 
 void
@@ -74,15 +71,15 @@ editor_draw_update()
     
     struct str_buf renderb = str_buf_init(100);
 
-    str_buf_append_str(&renderb, cstrn("\x1b[?25l", 6));
-    str_buf_append_str(&renderb, cstrn("\x1b[H", 3));
+    str_buf_append(&renderb, cstrn("\x1b[?25l", 6));
+    str_buf_append(&renderb, cstrn("\x1b[H", 3));
 
     render_draw_rows(&current_buffer, &renderb);
     render_draw_status_bar(&current_buffer, &renderb);
     render_draw_status_message(&current_buffer, &renderb);
     render_set_cursor_position(&current_buffer, &renderb);
 
-    str_buf_append_str(&renderb, cstrn("\x1b[?25h", 6));
+    str_buf_append(&renderb, cstrn("\x1b[?25h", 6));
 
     render_flush(renderb);
     str_buf_deinit(&renderb);

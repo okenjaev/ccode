@@ -51,7 +51,7 @@ buffer_cursor_update(struct buffer* buffer)
 }
 
 void
-buffer_append_row(struct buffer* buffer, int at_line, struct str str)
+buffer_append_row(struct buffer* buffer, int at_line, struct str_buf str)
 {
     if (at_line < 0 || at_line > buffer->num_rows)
     {
@@ -215,17 +215,17 @@ buffer_deinit(struct buffer buffer)
 }
 
 void
-buffer_fill(struct buffer* buffer, struct str text)
+buffer_fill(struct buffer* buffer, struct str_buf text)
 {
     while(1)
     {
-	struct str val = str_split(&text, cstr("\n")); 
+	struct str_buf val = str_buf_split(&text, cstr("\n")); 
 	if (val.size == -1)
 	{
 	    break;
 	}
 	
 	buffer_append_row(buffer, buffer->num_rows, val);
-	str_deinit(&val);
+	str_buf_deinit(&val);
     }
 }

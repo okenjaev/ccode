@@ -13,7 +13,7 @@ void
 render_draw_status_bar(const struct buffer* buffer, struct str_buf* renderb);
 
 void
-render_draw_status_message(const struct buffer* buffer, struct str_buf* renderb);
+render_draw_status_message(struct buffer* buffer, struct str_buf* renderb);
 
 void
 render_draw_rows(const struct buffer* buffer, struct str_buf* renderb);
