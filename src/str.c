@@ -28,11 +28,7 @@ str_buf_init_raw(char* data, int size)
 void
 str_buf_deinit(struct str_buf* buf)
 {
-    if (buf->capacity > 0)
-    {
-	free(buf->data);
-    }
-
+    free(buf->data);
     buf->data = NULL;
     buf->capacity = 0;
     buf->size = 0;	
@@ -100,7 +96,7 @@ str_buf_split(struct str_buf* str, const struct str_buf delim)
 	{
 	    struct str_buf ret = str_buf_init_raw(str->data, i);
 	    str->size = str->size - (i + delimsize);
-	    memmove(str->data, i + delimsize + str->data, str->size);	    
+	    memmove(str->data, i + delimsize + str->data, str->size);
 	    return ret;
 	}
 	
@@ -116,6 +112,11 @@ str_buf_cmp(struct str_buf str, struct str_buf ano_str)
     if (str.size != ano_str.size)
     {
 	return 0;
+    }
+
+    if (str.data == NULL && ano_str.data == NULL)
+    {
+	return 1;
     }
 
     for (int i=0; i<str.size; i++)

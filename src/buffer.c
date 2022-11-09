@@ -220,7 +220,7 @@ buffer_fill(struct buffer* buffer, struct str_buf text)
     while(1)
     {
 	struct str_buf val = str_buf_split(&text, cstr("\n")); 
-	if (val.size == -1)
+	if (str_buf_cmp(val, str_buf_nan))
 	{
 	    break;
 	}
