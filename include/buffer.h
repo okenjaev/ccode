@@ -28,6 +28,9 @@ struct buffer
 	    .file_name = NULL,						\
 	    .row = NULL}
 
+struct buffer*
+buffer_current();
+
 struct str_buf
 buffer_serialize(const struct buffer*);
 
@@ -38,22 +41,10 @@ void
 buffer_delete_row(struct buffer*, int);
 
 void
-buffer_insert_row(struct buffer*);
-
-void
-buffer_cursor_update(struct buffer*);
-
-void
-buffer_move_cursor(struct buffer*, int);
+buffer_update(struct buffer*);
 
 void
 buffer_row_append_string(struct buffer*);
-
-void
-buffer_insert_char(struct buffer*, int, char);
-
-void
-buffer_remove_char(struct buffer*);
 
 void
 buffer_deinit(struct buffer);

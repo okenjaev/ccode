@@ -3,7 +3,7 @@
 #include "buffer.h"
 #include "sys.h"
 #include "row.h"
-#include "statmessage.h"
+#include "sm.h"
 
 extern struct config config;
 extern struct sm sm;

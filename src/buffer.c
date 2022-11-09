@@ -6,6 +6,14 @@
 
 extern struct config config;
 
+static struct buffer current_buffer = BUFFER_INIT;
+
+struct buffer*
+buffer_current()
+{
+    return &current_buffer;
+}
+
 void
 buffer_delete_row(struct buffer* buffer, int index)
 {
@@ -22,7 +30,7 @@ buffer_delete_row(struct buffer* buffer, int index)
 }
 
 void
-buffer_cursor_update(struct buffer* buffer)
+buffer_update(struct buffer* buffer)
 {
     buffer->cp.r = buffer->cp.x;
 
@@ -87,121 +95,6 @@ buffer_serialize(const struct buffer* buffer)
     return res;
 }
 
-void
-buffer_insert_char(struct buffer* buffer, int index, char c)
-{
-    if (buffer->cp.y == buffer->num_rows)
-    {
-	buffer_append_row(buffer, buffer->num_rows, cstr(""));
-    }
-    
-    struct row* row = buffer->row + buffer->cp.y;
-    row_insert_char(row, index, c);
-    buffer->cp.x++;
-    buffer->dirty++;
-}
-
-void
-buffer_insert_row(struct buffer* buffer)
-{
-    if (buffer->cp.x == 0)
-    {
-        buffer_append_row(buffer, buffer->cp.y, cstr(""));
-    }
-    else
-    {
-	struct row *row = buffer->row + buffer->cp.y;
-	buffer_append_row(buffer, buffer->cp.y + 1, cstrn(row->chars.data + buffer->cp.x, row->chars.size - buffer->cp.x));
-	row = buffer->row + buffer->cp.y;
-	row_resize(row, buffer->cp.x);
-    }
-    buffer->cp.y++;
-    buffer->cp.x = 0;
-}
-
-// TODO: remove int key and just receive the x and y
-void
-buffer_move_cursor(struct buffer* buffer, int key)
-{
-    struct row* row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y]; 
-    
-    switch (key)
-    {
-    case ARROW_LEFT:
-	if (buffer->cp.x != 0)
-	{
-	    buffer->cp.x--;	    
-	}
-	else if (buffer->cp.y > 0)
-	{
-	    buffer->cp.y--;
-	    buffer->cp.x = buffer->row[buffer->cp.y].chars.size;
-	}
-	break;
-    case ARROW_RIGHT:
-	if (row && buffer->cp.x < row->chars.size)
-	{
-	    buffer->cp.x++;	    	    
-	}
-	else if (row && buffer->cp.x == row->chars.size)
-	{
-	    buffer->cp.y++;
-	    buffer->cp.x = 0;
-	}
-	break;
-    case ARROW_UP:
-	if (buffer->cp.y != 0)
-	{
-	    buffer->cp.y--;	    
-	}
-	break;
-    case ARROW_DOWN:
-	if (buffer->cp.y < buffer->num_rows)
-	{
-	    buffer->cp.y++;	    
-	}
-	break;
-    }
-
-    row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y];
-    int rowlen = row ? row->chars.size : 0;
-    if (buffer->cp.x > rowlen)
-    {
-	buffer->cp.x = rowlen;
-    }
-}
-
-void
-buffer_remove_char(struct buffer* buffer)
-{
-    if (buffer->cp.y == buffer->num_rows)
-    {
-	return;
-    }
-
-    if (buffer->cp.x == 0 && buffer->cp.y == 0)
-    {
-	return;
-    }
-
-    struct row *row = buffer->row + buffer->cp.y;
-    
-    if (buffer->cp.x > 0)
-    {
-	struct row* row = buffer->row + buffer->cp.y;
-	row_remove_char(row, buffer->cp.x - 1);
-	buffer->cp.x--;
-	buffer->dirty++;
-    }
-    else
-    {
-	buffer->cp.x = buffer->row[buffer->cp.y - 1].chars.size;
-	row_append_string(&buffer->row[buffer->cp.y - 1], cstrn(row->chars.data, row->chars.size));
-	buffer_delete_row(buffer, buffer->cp.y);
-	buffer->cp.y--;
-	buffer->dirty++;
-    }
-}
 
 void
 buffer_deinit(struct buffer buffer)

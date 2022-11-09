@@ -10,10 +10,7 @@ void
 editor_init();
 
 void
-editor_draw_update();
-
-void
-editor_input_update();
+editor_update();
 
 void
 editor_open(const char* file_name);

@@ -3,6 +3,8 @@
 
 #include "common.h"
 
+struct buffer;
+
 enum editor_keys
 {
     BACKSPACE = 127,
@@ -17,8 +19,7 @@ enum editor_keys
     DEL_KEY
 };
 
-
-int
-editor_read_key();
+void
+input_update();
 
 #endif /* INPUT_H */

@@ -1,5 +1,5 @@
-#ifndef STATMESSAGE_H
-#define STATMESSAGE_H
+#ifndef SM_H
+#define SM_H
 
 #include "common.h"
 
@@ -12,4 +12,4 @@ struct sm
 void
 sm_set_message(const char* fmt, ...);
 
-#endif /* STATMESSAGE_H */
+#endif /* SM_H */

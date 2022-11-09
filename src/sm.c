@@ -1,4 +1,4 @@
-#include "statmessage.h"
+#include "sm.h"
 
 struct sm sm;
 

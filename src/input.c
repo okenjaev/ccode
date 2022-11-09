@@ -1,7 +1,10 @@
 #include "input.h"
 #include "sys.h"
+#include "buffer.h"
+#include "sm.h"
+#include "4me.h"
 
-
+static
 int
 editor_read_key()
 {
@@ -94,4 +97,59 @@ editor_read_key()
     {
 	return c;	
     }    
+}
+
+void
+input_update()
+{    
+    int c = editor_read_key();
+    switch(c)
+    {
+    case CTRL_KEY('o'):
+	fm_buffer_open_file("../txt");
+	return;
+	
+    case CTRL_KEY('l'):
+    case '\x1b':
+	break;
+
+    case CTRL_KEY('h'):
+    case BACKSPACE:
+    case DEL_KEY:
+	if (c == DEL_KEY)
+	{
+	    fm_buffer_cursor_move_right();
+	}
+	fm_buffer_remove_char();
+	break;
+
+    case '\r':
+	fm_buffer_insert_row();
+	break;
+
+    case CTRL_KEY('s'):
+	fm_buffer_save();
+	break;
+
+    case CTRL_KEY('q'):
+	fm_exit();
+	break;
+	
+    case ARROW_UP:
+	fm_buffer_cursor_move_up();
+	break;
+    case ARROW_LEFT:
+	fm_buffer_cursor_move_left();
+	break;
+    case ARROW_RIGHT:
+	fm_buffer_cursor_move_right();
+	break;
+    case ARROW_DOWN:
+	fm_buffer_cursor_move_down();
+	break;
+    break;
+    default:
+        fm_buffer_insert_char(c);
+    }
+
 }

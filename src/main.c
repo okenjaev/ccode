@@ -12,8 +12,7 @@ main(int argc, char *argv[])
 
     while(1)
     {
-	editor_draw_update();
-	editor_input_update();
+	editor_update();
     }
 
     return 0;
