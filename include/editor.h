@@ -2,7 +2,6 @@
 #define EDITOR_H
 
 #include "common.h"
-#include "buffer.h"
 
 void
 editor_set_status_message(const char* fmt, ...);

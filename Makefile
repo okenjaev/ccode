@@ -1,6 +1,6 @@
 
 CC ?= gcc
-CFLAGS := -Iinclude/ -O3
+CFLAGS := -Iinclude/ -O3 -lpython3.10
 DBGFLAGS := -g -fsanitize=address -Wall
 COBJFLAGS := $(CFLAGS) -c
 

@@ -19,8 +19,6 @@ struct buffer
     int dirty;
     int num_rows;
     char* file_name;
-    time_t status_message_time;
-    char status_message[80];
     struct row *row;
 };
 
@@ -28,8 +26,6 @@ struct buffer
 	    .dirty = 0,							\
 	    .num_rows = 0,						\
 	    .file_name = NULL,						\
-	    .status_message_time = 0,					\
-	    .status_message = {'\0'},					\
 	    .row = NULL}
 
 struct str_buf

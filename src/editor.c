@@ -4,6 +4,8 @@
 #include "input.h"
 #include "str.h"
 #include "row.h"
+#include "statmessage.h"
+#include "buffer.h"
 
 extern struct config config;
 
@@ -18,16 +20,6 @@ editor_init()
 struct buffer current_buffer = BUFFER_INIT;
 
 void
-editor_set_status_message(const char* fmt, ...)
-{
-    va_list ap;
-    va_start(ap, fmt);
-    vsnprintf(current_buffer.status_message, sizeof(current_buffer.status_message), fmt, ap);
-    va_end(ap);
-    current_buffer.status_message_time = time(NULL);
-}
-
-void
 editor_save(struct buffer* buffer)
 {
     if (buffer->file_name == NULL)
@@ -39,15 +31,15 @@ editor_save(struct buffer* buffer)
 
     if (write_to_file(buffer->file_name, buffer_str))
     {
-	editor_set_status_message("%d bytes has been saved to disk", buffer_str.size);
-	str_buf_deinit(&buffer_str);	
+        sm_set_message("%d bytes has been saved to disk", buffer_str.size);
 	buffer->dirty = 0;	
     }
     else
     {
-	str_buf_deinit(&buffer_str);
-	editor_set_status_message("Error: Can't save file %s", strerror(errno));	
+        sm_set_message("Error: Can't save file %s", strerror(errno));       
     }
+
+    str_buf_deinit(&buffer_str);	
 }
 
 void
@@ -68,21 +60,8 @@ void
 editor_draw_update()
 {
     buffer_cursor_update(&current_buffer);
-    
-    struct str_buf renderb = str_buf_init(100);
 
-    str_buf_append(&renderb, cstrn("\x1b[?25l", 6));
-    str_buf_append(&renderb, cstrn("\x1b[H", 3));
-
-    render_draw_rows(&current_buffer, &renderb);
-    render_draw_status_bar(&current_buffer, &renderb);
-    render_draw_status_message(&current_buffer, &renderb);
-    render_set_cursor_position(&current_buffer, &renderb);
-
-    str_buf_append(&renderb, cstrn("\x1b[?25h", 6));
-
-    render_flush(renderb);
-    str_buf_deinit(&renderb);
+    render_draw(&current_buffer);
 }
 
 void
@@ -122,7 +101,7 @@ editor_input_update()
     case CTRL_KEY('q'):
 	if (current_buffer.dirty > 0 && quit_times > 0)
 	{
-	    editor_set_status_message("File has been changed. "
+	    sm_set_message("File has been changed. "
 				      "Please press Ctrl-Q %d to quit without saving", quit_times);
 	    quit_times--;
 	    return;

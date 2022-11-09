@@ -3,8 +3,10 @@
 #include "buffer.h"
 #include "sys.h"
 #include "row.h"
+#include "statmessage.h"
 
 extern struct config config;
+extern struct sm sm;
 
 void
 render_set_cursor_position(const struct buffer* buffer, struct str_buf* renderb)
@@ -51,18 +53,18 @@ render_draw_status_bar(const struct buffer* buffer, struct str_buf* renderb)
 }
 
 void
-render_draw_status_message(struct buffer* buffer, struct str_buf* renderb)
+render_draw_status_message(struct str_buf* renderb)
 {
     str_buf_append(renderb, cstrn("\x1b[K", 3));
-    int meslen = strlen(buffer->status_message);
+    int meslen = strlen(sm.message);
 
     if (meslen > config.screencols){
 	meslen = config.screencols;
     }
 
-    if (meslen && time(NULL) - buffer->status_message_time < 5)
+    if (meslen && time(NULL) - sm.time < 5)
     {
-	str_buf_append(renderb, cstrn(buffer->status_message, meslen));	
+	str_buf_append(renderb, cstrn(sm.message, meslen));	
     }
 }
 
@@ -120,6 +122,24 @@ render_draw_rows(const struct buffer* buffer, struct str_buf* renderb)
 	str_buf_append(renderb, cstrn("\x1b[K", 3));
 	str_buf_append(renderb, cstrn("\r\n", 2));
     }
+}
+
+struct str_buf renderb = {.data = NULL, .size = 0, .capacity = 0};
+
+void render_draw(const struct buffer* buffer)
+{
+    str_buf_resize(&renderb, 0);
+    str_buf_append(&renderb, cstrn("\x1b[?25l", 6));
+    str_buf_append(&renderb, cstrn("\x1b[H", 3));
+
+    render_draw_rows(buffer, &renderb);
+    render_draw_status_bar(buffer, &renderb);
+    render_draw_status_message(&renderb);
+    render_set_cursor_position(buffer, &renderb);
+
+    str_buf_append(&renderb, cstrn("\x1b[?25h", 6));
+
+    render_flush(renderb);
 }
 
 int
