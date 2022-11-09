@@ -14,7 +14,7 @@ void
 fm_buffer_cursor_move_right();
 
 void
-fm_buffer_open_file();
+fm_buffer_open_file(const char* file_name);
 
 void
 fm_buffer_save();

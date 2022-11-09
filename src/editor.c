@@ -21,8 +21,7 @@ editor_init()
 void
 editor_open(const char* file_name)
 {
-    struct buffer* buffer = buffer_current();
-    fm_buffer_open_file(buffer, file_name);
+    fm_buffer_open_file(file_name);
 }
 
 void
