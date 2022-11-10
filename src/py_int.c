@@ -5,19 +5,23 @@
 static int numargs=0;
 
 static PyObject*
-insert_char(PyObject *self, PyObject *args)
+insert_message(PyObject *self, PyObject *args)
 {
     char* c;
     if(!PyArg_ParseTuple(args, "s", &c))
         return NULL;
 
-    fm_insert_char(*c);
+    while(*c != '\0')
+    {
+	fm_insert_char(*c);
+	c++;
+    }
     
     return PyLong_FromLong(1);
 }
 
 static PyMethodDef fme_methods[] = {
-    {"insert_char", insert_char, METH_VARARGS,
+    {"insert_char", insert_message, METH_VARARGS,
      "insert char to current buffer"},
     {NULL, NULL, 0, NULL}
 };

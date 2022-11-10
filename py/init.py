@@ -1,3 +1,3 @@
 import fme
 
-fme.insert_char("c")
+fme.insert_char("Hello everyone")
