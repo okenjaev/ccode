@@ -1,1 +1,3 @@
-prints("Something")
+import fme
+
+fme.insert_char("c")

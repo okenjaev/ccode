@@ -3,6 +3,7 @@
 #include "buffer.h"
 #include "sm.h"
 #include "4me.h"
+#include "py_int.h"
 
 static
 int
@@ -106,6 +107,7 @@ input_update()
     switch(c)
     {
     case CTRL_KEY('o'):
+	/* exit(0); */
 	fm_open_file("../txt");
 	return;
 	

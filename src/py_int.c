@@ -1,19 +1,23 @@
 #include "py_int.h"
 #include "sys.h"
+#include "4me.h"
 
 static int numargs=0;
 
 static PyObject*
-fme_insert_char(PyObject *self, PyObject *args)
+insert_char(PyObject *self, PyObject *args)
 {
-    char c;
-    if(!PyArg_ParseTuple(args, "c", &c))
+    char* c;
+    if(!PyArg_ParseTuple(args, "s", &c))
         return NULL;
-    return PyLong_FromLong(numargs);
+
+    fm_insert_char(*c);
+    
+    return PyLong_FromLong(1);
 }
 
 static PyMethodDef fme_methods[] = {
-    {"insert_char", fme_insert_char, METH_VARARGS,
+    {"insert_char", insert_char, METH_VARARGS,
      "insert char to current buffer"},
     {NULL, NULL, 0, NULL}
 };
@@ -24,23 +28,25 @@ static PyModuleDef fme_module = {
 };
 
 static PyObject*
-PyInit_emb(void)
+PyInit_fme(void)
 {
     return PyModule_Create(&fme_module);
 }
 
 void
-py_run(char** argv)
+py_run(void)
 {
     FILE *fp = fopen("py/init.py", "r");
     
-    wchar_t *program = Py_DecodeLocale(argv[0], NULL);
+    wchar_t *program = Py_DecodeLocale("./4me", NULL);
     if (program == NULL)
     {
 	die("py program exited");
     }
 
     Py_SetProgramName(program);
+    PyImport_AppendInittab("fme", &PyInit_fme);
+
     Py_Initialize();
 
     PyRun_SimpleFile(fp, "py/init.py");

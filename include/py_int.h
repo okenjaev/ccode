@@ -7,6 +7,6 @@
 #include <python3.10/Python.h>
 
 void
-py_run(char** argv);
+py_run(void);
 
 #endif /* PY_INT_H */
