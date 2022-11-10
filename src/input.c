@@ -106,7 +106,7 @@ input_update()
     switch(c)
     {
     case CTRL_KEY('o'):
-	fm_buffer_open_file("../txt");
+	fm_open_file("../txt");
 	return;
 	
     case CTRL_KEY('l'):
@@ -118,17 +118,17 @@ input_update()
     case DEL_KEY:
 	if (c == DEL_KEY)
 	{
-	    fm_buffer_cursor_move_right();
+	    fm_forward();
 	}
-	fm_buffer_remove_char();
+	fm_remove_char();
 	break;
 
     case '\r':
-	fm_buffer_insert_row();
+	fm_insert_row();
 	break;
 
     case CTRL_KEY('s'):
-	fm_buffer_save();
+	fm_save();
 	break;
 
     case CTRL_KEY('q'):
@@ -136,20 +136,20 @@ input_update()
 	break;
 	
     case ARROW_UP:
-	fm_buffer_cursor_move_up();
+	fm_previous();
 	break;
     case ARROW_LEFT:
-	fm_buffer_cursor_move_left();
+	fm_backward();
 	break;
     case ARROW_RIGHT:
-	fm_buffer_cursor_move_right();
+	fm_forward();
 	break;
     case ARROW_DOWN:
-	fm_buffer_cursor_move_down();
+	fm_next();
 	break;
     break;
     default:
-        fm_buffer_insert_char(c);
+        fm_insert_char(c);
     }
 
 }

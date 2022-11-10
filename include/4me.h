@@ -2,31 +2,31 @@
 #define FM_H
 
 void
-fm_buffer_cursor_move_up();
+fm_previous();
 
 void
-fm_buffer_cursor_move_down();
+fm_next();
 
 void
-fm_buffer_cursor_move_left();
+fm_forward();
 
 void
-fm_buffer_cursor_move_right();
+fm_backward();
 
 void
-fm_buffer_open_file(const char* file_name);
+fm_open_file(const char* file_name);
 
 void
-fm_buffer_save();
+fm_save();
 
 void
-fm_buffer_insert_row();
+fm_insert_row();
 
 void
-fm_buffer_insert_char(char c);
+fm_insert_char(char c);
 
 void
-fm_buffer_remove_char();
+fm_remove_char();
 
 void
 fm_exit();

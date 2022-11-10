@@ -5,7 +5,7 @@
 #include "sm.h"
 
 void
-fm_buffer_cursor_move_up()
+fm_previous()
 {
     struct buffer* buffer = buffer_current();
 
@@ -25,7 +25,7 @@ fm_buffer_cursor_move_up()
 }
 
 void
-fm_buffer_cursor_move_down()
+fm_next()
 {
     struct buffer* buffer = buffer_current();
 
@@ -45,7 +45,7 @@ fm_buffer_cursor_move_down()
 }
 
 void
-fm_buffer_cursor_move_left()
+fm_forward()
 {
     struct buffer* buffer = buffer_current();
 
@@ -70,7 +70,7 @@ fm_buffer_cursor_move_left()
 }
 
 void
-fm_buffer_cursor_move_right()
+fm_backward()
 {
     struct buffer* buffer = buffer_current();
 
@@ -95,7 +95,7 @@ fm_buffer_cursor_move_right()
 }
 
 void
-fm_buffer_open_file(const char* file_name)
+fm_open_file(const char* file_name)
 {
     struct buffer* buffer = buffer_current();
 
@@ -111,7 +111,7 @@ fm_buffer_open_file(const char* file_name)
 }
 
 void
-fm_buffer_save()
+fm_save()
 {
     struct buffer* buffer = buffer_current();
 
@@ -136,7 +136,7 @@ fm_buffer_save()
 }
 
 void
-fm_buffer_insert_row()
+fm_insert_row()
 {
     struct buffer* buffer = buffer_current();
 
@@ -156,7 +156,7 @@ fm_buffer_insert_row()
 }
 
 void
-fm_buffer_insert_char(char c)
+fm_insert_char(char c)
 {
     struct buffer* buffer = buffer_current();
 
@@ -174,7 +174,7 @@ fm_buffer_insert_char(char c)
 }
 
 void
-fm_buffer_remove_char()
+fm_remove_char()
 {
     struct buffer* buffer = buffer_current();
 

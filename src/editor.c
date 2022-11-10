@@ -21,7 +21,7 @@ editor_init()
 void
 editor_open(const char* file_name)
 {
-    fm_buffer_open_file(file_name);
+    fm_open_file(file_name);
 }
 
 void
