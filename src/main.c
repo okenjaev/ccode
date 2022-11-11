@@ -12,7 +12,7 @@ main(int argc, char *argv[])
     }
 
     py_run();
-
+    
     while(1)
     {
 	editor_update();

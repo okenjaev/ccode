@@ -51,14 +51,14 @@ fm_forward()
 
     struct row* row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y]; 
     
-    if (buffer->cp.x != 0)
+    if (row && buffer->cp.x < row->chars.size)
     {
-	buffer->cp.x--;	    
+	buffer->cp.x++;	    	    
     }
-    else if (buffer->cp.y > 0)
+    else if (row && buffer->cp.x == row->chars.size)
     {
-	buffer->cp.y--;
-	buffer->cp.x = buffer->row[buffer->cp.y].chars.size;
+	buffer->cp.y++;
+	buffer->cp.x = 0;
     }
 
     row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y];
@@ -74,18 +74,18 @@ fm_backward()
 {
     struct buffer* buffer = buffer_current();
 
-    struct row* row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y]; 
+    struct row* row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y];     
     
-    if (row && buffer->cp.x < row->chars.size)
+    if (buffer->cp.x != 0)
     {
-	buffer->cp.x++;	    	    
+	buffer->cp.x--;	    
     }
-    else if (row && buffer->cp.x == row->chars.size)
+    else if (buffer->cp.y > 0)
     {
-	buffer->cp.y++;
-	buffer->cp.x = 0;
+	buffer->cp.y--;
+	buffer->cp.x = buffer->row[buffer->cp.y].chars.size;
     }
-
+    
     row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y];
     int rowlen = row ? row->chars.size : 0;
     if (buffer->cp.x > rowlen)

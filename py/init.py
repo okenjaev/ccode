@@ -1,3 +1,8 @@
-import fme
+from fme import *
 
-fme.insert_char("Hello everyone")
+insert_message("Hello \neveryone\n")
+previous(2)
+forward(2)
+backward()
+next()
+open_file("../txt")
