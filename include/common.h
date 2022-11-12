@@ -21,9 +21,6 @@
 #define FORME_CTRL_KEY(k) ((k) & 0x1f)
 
 #define FORME_QUIT_TIMES 3
-
 #define FORME_NUMBER_OF_SPACES_FOR_TAB 4
-
-#define FORME_ESQ_CONTROL "\1xb["
 
 #endif /* COMMON_H */

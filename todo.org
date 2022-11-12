@@ -1,5 +1,10 @@
 * Tasks:
 
-** TODO Row optimization with str_buf
-** TODO Move rendering to str_buf
+** DONE Row optimization with str_buf
+** DONE Move rendering to str_buf
 ** TODO Hot keys
+
+
+* Bugs:
+
+** TODO Removing new line

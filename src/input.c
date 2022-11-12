@@ -28,30 +28,40 @@ input_update()
 {    
     char c = read_key();
 
-    if (c == FORME_CTRL_KEY('q'))
+    if (iscntrl(c))
     {
-	fm_exit();
-    }
-    else if (c == FORME_CTRL_KEY('p'))
-    {
-	fm_previous();
-    }
-    else if (c == FORME_CTRL_KEY('n'))
-    {
-	fm_next();
-    }
-    else if (c == FORME_CTRL_KEY('b'))
-    {
-	fm_backward();
-    }
-    else if (c == FORME_CTRL_KEY('f'))
-    {
-	fm_forward();
+	if (c == FORME_CTRL_KEY('q'))
+	{
+	    fm_exit();
+	}
+	else if (c == FORME_CTRL_KEY('p'))
+	{
+	    fm_previous();
+	}
+	else if (c == FORME_CTRL_KEY('n'))
+	{
+	    fm_next();
+	}
+	else if (c == FORME_CTRL_KEY('b'))
+	{
+	    fm_backward();
+	}
+	else if (c == FORME_CTRL_KEY('f'))
+	{
+	    fm_forward();
+	}
+	else if (c == FORME_CTRL_KEY('d'))
+	{
+	    // TODO: bug with removing new line
+	    fm_forward();
+	    fm_remove_char();
+	}
     }
     else
     {
 	fm_insert_char(c);
     }
-    
+
+    sm_set_message("%c", c);
 }
 
