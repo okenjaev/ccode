@@ -6,6 +6,6 @@
 #define NUMBER_OF_KBDS 4
 
 void
-input_update();
+input_update(void);
 
 #endif /* INPUT_H */
