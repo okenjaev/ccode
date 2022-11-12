@@ -95,7 +95,6 @@ buffer_serialize(const struct buffer* buffer)
     return res;
 }
 
-
 void
 buffer_deinit(struct buffer buffer)
 {

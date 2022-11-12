@@ -17,8 +17,8 @@
 #include <time.h>
 #include <fcntl.h>
 
-#define FORME_VERSION "0.0.1"
-#define CTRL_KEY(k) ((k) & 0x1f)
+#define FORME_VERSION "0.0.5"
+#define FORME_CTRL_KEY(k) ((k) & 0x1f)
 
 #define FORME_QUIT_TIMES 3
 

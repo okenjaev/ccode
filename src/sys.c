@@ -177,3 +177,20 @@ write_to_file(const char* file_name, struct str_buf buffer_str)
     }
     return 0;
 }
+
+char
+read_key()
+{
+    char c;
+
+    int nread;
+    while((nread = read(STDIN_FILENO, &c, 1)) != 1)
+    {
+	if (nread == -1 && errno != EAGAIN)
+	{
+	    die("read");
+	}
+    }
+
+    return c;
+}

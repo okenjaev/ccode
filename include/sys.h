@@ -33,4 +33,7 @@ load_file(struct str_buf* str_buf, const char* file_name);
 int
 write_to_file(const char* file_name, struct str_buf buffer_str);
 
+char
+read_key();
+
 #endif /* SYS_H */

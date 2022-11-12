@@ -1,5 +1,4 @@
 #include "editor.h"
-#include "sm.h"
 
 int
 main(int argc, char *argv[])
@@ -11,8 +10,6 @@ main(int argc, char *argv[])
 	editor_open(argv[1]);
     }
 
-    py_run();
-    
     while(1)
     {
 	editor_update();
