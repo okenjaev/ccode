@@ -1,11 +1,15 @@
 #include "py_int.h"
+
+#include <python3.10/Python.h>
+
 #include "sys.h"
-#include "4me.h"
+#include "buffer.h"
+#include "editor.h"
 
 static int numargs=0;
 
 static PyObject*
-insert_message(PyObject *self, PyObject *args)
+insert(PyObject *self, PyObject *args)
 {
     char* c;
     if(!PyArg_ParseTuple(args, "s", &c))
@@ -15,11 +19,11 @@ insert_message(PyObject *self, PyObject *args)
     {
 	if (*c == '\n')
 	{
-	    fm_insert_row();
+	    buffer_insert_row();
 	}
 	else
 	{
-	    fm_insert_char(*c);
+	    buffer_insert_char(*c);
 	}
 	c++;
     }
@@ -35,7 +39,7 @@ previous(PyObject* self, PyObject *args)
 	return NULL;
 
     for(int i = 0; i < t; i++)
-	fm_previous();
+	buffer_cursor_previous();
 
     return Py_None;
 }
@@ -48,7 +52,7 @@ next(PyObject* self, PyObject *args)
 	return NULL;
 
     for(int i = 0; i < t; i++)
-	fm_next();
+	buffer_cursor_next();
 
     return Py_None;
 }
@@ -61,7 +65,7 @@ forward(PyObject* self, PyObject *args)
 	return NULL;
 
     for(int i = 0; i < t; i++)
-	fm_forward();
+	buffer_cursor_forward();
 
     return Py_None;
 }
@@ -74,7 +78,7 @@ backward(PyObject* self, PyObject *args)
 	return NULL;
 
     for(int i = 0; i < t; i++)
-	fm_backward();
+        buffer_cursor_backward();
 
     return Py_None;
 }
@@ -82,14 +86,14 @@ backward(PyObject* self, PyObject *args)
 static PyObject*
 quit(PyObject* self, PyObject* Py_UNUSED(args))
 {
-    fm_exit();
+    editor_exit();
     return Py_None;
 }
 
 static PyObject*
 save(PyObject* self, PyObject* Py_UNUSED(args))
 {
-    fm_save();
+    buffer_save();
     return Py_None;
 }
 
@@ -100,14 +104,14 @@ open_file(PyObject* self, PyObject* args)
     if(!PyArg_ParseTuple(args, "s", &s))
         return NULL;
 
-    fm_open_file(s);
+    buffer_open_file(s);
     
     return Py_None;
 }
 
 static PyMethodDef fme_methods[] = {
-    {"insert_message", insert_message, METH_VARARGS,
-     "insert char in the current buffer"},
+    {"insert", insert, METH_VARARGS,
+     "insert string in the current buffer"},
     {"previous", previous, METH_VARARGS, "moves cursor to previous line"},
     {"next", next, METH_VARARGS, "moves cursor to next line"},
     {"forward", forward, METH_VARARGS, "moves cursor to forward at the same line"},
@@ -133,6 +137,11 @@ void
 py_run(void)
 {
     FILE *fp = fopen("py/init.py", "r");
+
+    if (!fp)
+    {
+	return;
+    }
     
     wchar_t *program = Py_DecodeLocale("./4me", NULL);
     if (program == NULL)

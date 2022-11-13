@@ -3,7 +3,8 @@
 ** DONE Row optimization with str_buf
 ** DONE Move rendering to str_buf
 ** TODO Hot keys
-
+** TODO Refactor save; remove sm from there
+** TODO Refactor abstraction of buffer; especially dirty, shouldn't be called from outside of buffer;
 
 * Bugs:
 

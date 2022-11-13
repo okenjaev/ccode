@@ -5,6 +5,7 @@
 
 struct row;
 
+
 struct cur_pos {
     int x;
     int y;
@@ -22,34 +23,57 @@ struct buffer
     struct row *row;
 };
 
-#define BUFFER_INIT {.cp = {.x=0,.y=0,.r=0,.coloff = 0,.rowoff=0},	\
-	    .dirty = 0,							\
-	    .num_rows = 0,						\
-	    .file_name = NULL,						\
-	    .row = NULL}
 
 struct buffer*
-buffer_current();
-
-struct str_buf
-buffer_serialize(const struct buffer*);
-
-void
-buffer_append_row(struct buffer*, int, struct str_buf);
-
-void
-buffer_delete_row(struct buffer*, int);
-
-void
-buffer_update(struct buffer*);
-
-void
-buffer_row_append_string(struct buffer*);
+buffer_current(void);
 
 void
 buffer_deinit(struct buffer);
 
+struct str_buf
+buffer_serialize(void);
+
 void
-buffer_fill(struct buffer*, struct str_buf);
+buffer_append_row(int, struct str_buf);
+
+void
+buffer_delete_row(int);
+
+void
+buffer_update(void);
+
+void
+buffer_row_append_string(void);
+
+void
+buffer_fill(struct str_buf);
+
+void
+buffer_insert_row(void);
+
+void
+buffer_insert_char(char c);
+
+void
+buffer_remove_char(void);
+
+void
+buffer_cursor_previous(void);
+
+void
+buffer_cursor_next(void);
+
+void
+buffer_cursor_forward(void);
+
+void
+buffer_cursor_backward(void);
+
+void
+buffer_open_file(const char* file_name);
+
+void
+buffer_save(void);
+
 
 #endif /* BUFFER_H */

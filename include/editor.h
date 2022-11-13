@@ -15,4 +15,7 @@ editor_update();
 void
 editor_open(const char* file_name);
 
+void
+editor_exit(void);
+
 #endif /* EDITOR_H */

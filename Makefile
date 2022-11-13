@@ -9,7 +9,6 @@ BIN_PATH := bin
 OBJ_PATH := bin-obj
 SRC_PATH := src
 DBG_PATH := bin-debug
-PYT_PATH := py
 
 # compile macros
 TARGET_NAME := 4me
@@ -23,14 +22,10 @@ TARGET_DEBUG := $(DBG_PATH)/$(TARGET_NAME)
 SRC := $(foreach x, $(SRC_PATH), $(wildcard $(addprefix $(x)/*,.c)))
 OBJ := $(addprefix $(OBJ_PATH)/, $(addsuffix .o, $(notdir $(basename $(SRC)))))
 OBJ_DEBUG := $(addprefix $(DBG_PATH)/, $(addsuffix .o, $(notdir $(basename $(SRC)))))
-PYS := $(foreach x, $(BIN_PATH)/$(PYT_PATH), $(wildcard $(addprefix $(x)/*,.py)))
-PYS_DEBUG := $(foreach x, $(DBG_PATH)/$(PYT_PATH), $(wildcard $(addprefix $(x)/*,.py)))
 
 # clean files list
 DISTCLEAN_LIST := $(OBJ) \
                   $(OBJ_DEBUG) \
-		  $(PYS) \
-		  $(PYS_DEBUG)
 
 CLEAN_LIST := $(TARGET) \
 			  $(TARGET_DEBUG) \
@@ -63,6 +58,9 @@ makedir:
 all: $(TARGET)
 
 debug: $(TARGET_DEBUG)
+
+r:
+	$(TARGET)
 
 clean:
 	@echo CLEAN $(CLEAN_LIST)

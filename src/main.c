@@ -9,7 +9,7 @@ main(int argc, char *argv[])
     {
 	editor_open(argv[1]);
     }
-
+    
     while(1)
     {
 	editor_update();

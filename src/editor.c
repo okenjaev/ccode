@@ -6,7 +6,6 @@
 #include "row.h"
 #include "sm.h"
 #include "buffer.h"
-#include "4me.h"
 
 extern struct config config;
 
@@ -21,15 +20,23 @@ editor_init()
 void
 editor_open(const char* file_name)
 {
-    fm_open_file(file_name);
+    buffer_open_file(file_name);
 }
 
 void
 editor_update()
 {
     struct buffer* buffer = buffer_current();
-    buffer_update(buffer);
+    buffer_update();
     render_draw(buffer);
-    input_update(buffer);
+    input_update();
 }
 
+void
+editor_exit(void)
+{
+    struct buffer* buffer = buffer_current();
+    restore();
+    buffer_deinit(*buffer);
+    exit(0);
+}    

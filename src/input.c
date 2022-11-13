@@ -2,9 +2,9 @@
 #include "sys.h"
 #include "buffer.h"
 #include "sm.h"
-#include "4me.h"
 #include "py_int.h"
 #include "sys.h"
+#include "editor.h"
 
 void setkbd(char* map, void (*func)(void))
 {
@@ -18,9 +18,14 @@ input_update(void)
 
     if (c == FORME_CTRL_KEY('q'))
     {
-	fm_exit();
+        editor_exit();
     }
-
+    else if (c == FORME_CTRL_KEY('o'))
+    {
+	buffer_open_file("../txt");
+    }
+    
+    
     sm_set_message("%c", c);
 }
 
