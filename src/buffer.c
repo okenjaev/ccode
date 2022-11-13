@@ -1,4 +1,3 @@
-#include "buffer.h"
 #include "sys.h"
 #include "row.h"
 #include "input.h"
@@ -7,18 +6,39 @@
 
 extern struct config config;
 
-static struct buffer current_buffer;
-
-struct buffer*
-buffer_current(void)
+typedef struct
 {
-    return &current_buffer;
+    struct cur_pos cp;
+    int dirty;
+    int num_rows;
+    char* file_name;
+    struct row *row;
+} Buffer;
+
+static Buffer current_buffer;
+
+const char*
+buffer_file_name(void)
+{
+    return current_buffer.file_name; 
+}
+
+const struct cur_pos
+buffer_cur_pos(void)
+{
+    return current_buffer.cp;
+}
+
+const int
+buffer_dirty(void)
+{
+    return current_buffer.dirty;
 }
 
 void
 buffer_delete_row(int index)
 {
-    struct buffer* buffer = buffer_current();
+    Buffer* buffer = &current_buffer;
     
     if (index < 0 || index >= buffer->num_rows)
     {
@@ -35,7 +55,7 @@ buffer_delete_row(int index)
 void
 buffer_update(void)
 {
-    struct buffer* buffer = buffer_current();
+    Buffer* buffer = &current_buffer;
 
     buffer->cp.r = buffer->cp.x;
 
@@ -66,7 +86,7 @@ buffer_update(void)
 void
 buffer_append_row(int at_line, struct str_buf str)
 {
-    struct buffer* buffer = buffer_current();
+    Buffer* buffer = &current_buffer;
 
     if (at_line < 0 || at_line > buffer->num_rows)
     {
@@ -90,7 +110,7 @@ buffer_append_row(int at_line, struct str_buf str)
 struct str_buf
 buffer_serialize(void)
 {
-    struct buffer* buffer = buffer_current();
+    Buffer* buffer = &current_buffer;
 
     struct str_buf res = str_buf_init(50);
     
@@ -105,20 +125,20 @@ buffer_serialize(void)
 }
 
 void
-buffer_deinit(struct buffer buffer)
+buffer_deinit()
 {
-    free(buffer.file_name);
-    for (int i = buffer.num_rows - 1; i >= 0; i--)
+    free(current_buffer.file_name);
+    for (int i = current_buffer.num_rows - 1; i >= 0; i--)
     {
-	row_deinit(i + buffer.row);
+	row_deinit(i + current_buffer.row);
     }
-    free(buffer.row);
+    free(current_buffer.row);
 }
 
 void
 buffer_fill(struct str_buf text)
 {
-    struct buffer* buffer = buffer_current();
+    Buffer* buffer = &current_buffer;
 
     while(1)
     {
@@ -136,7 +156,7 @@ buffer_fill(struct str_buf text)
 void
 buffer_insert_row(void)
 {
-    struct buffer* buffer = buffer_current();
+    Buffer* buffer = &current_buffer;
 
     if (buffer->cp.x == 0)
     {
@@ -156,7 +176,7 @@ buffer_insert_row(void)
 void
 buffer_insert_char(char c)
 {
-    struct buffer* buffer = buffer_current();
+    Buffer* buffer = &current_buffer;
 
     int index = buffer->cp.x;
     
@@ -174,7 +194,7 @@ buffer_insert_char(char c)
 void
 buffer_remove_char(void)
 {
-    struct buffer* buffer = buffer_current();
+    Buffer* buffer = &current_buffer;
 
     if (buffer->cp.y == buffer->num_rows)
     {
@@ -208,7 +228,7 @@ buffer_remove_char(void)
 void
 buffer_cursor_previous(void)
 {
-    struct buffer* buffer = buffer_current();
+    Buffer* buffer = &current_buffer;
 
     struct row* row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y]; 
     
@@ -228,7 +248,7 @@ buffer_cursor_previous(void)
 void
 buffer_cursor_next(void)
 {
-    struct buffer* buffer = buffer_current();
+    Buffer* buffer = &current_buffer;
 
     struct row* row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y]; 
     
@@ -248,7 +268,7 @@ buffer_cursor_next(void)
 void
 buffer_cursor_forward(void)
 {
-    struct buffer* buffer = buffer_current();
+    Buffer* buffer = &current_buffer;
 
     struct row* row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y]; 
     
@@ -273,7 +293,7 @@ buffer_cursor_forward(void)
 void
 buffer_cursor_backward(void)
 {
-    struct buffer* buffer = buffer_current();
+    Buffer* buffer = &current_buffer;
 
     struct row* row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y];     
     
@@ -298,7 +318,7 @@ buffer_cursor_backward(void)
 void
 buffer_open_file(const char* file_name)
 {
-    struct buffer* buffer = buffer_current();
+    Buffer* buffer = &current_buffer;
 
     free(buffer->file_name);
     buffer->file_name = strdup(file_name);
@@ -314,7 +334,7 @@ buffer_open_file(const char* file_name)
 void // TODO: NEED TO refactor
 buffer_save(void)
 {
-    struct buffer* buffer = buffer_current();
+    Buffer* buffer = &current_buffer;
 
     if (buffer->file_name == NULL)
     {
@@ -336,3 +356,60 @@ buffer_save(void)
     str_buf_deinit(&buffer_str);	
 }
 
+void
+buffer_convert_to_render(struct str_buf* renderb)
+{
+    const Buffer* buffer = &current_buffer;
+    
+    for(int y=0; y<config.screenrows; y++)
+    {
+	int filerow = y + buffer->cp.rowoff;
+	if (filerow >= buffer->num_rows) {
+	    if (buffer->num_rows == 0 && y == config.screenrows / 3)
+	    {
+		char welcome[80];
+		int welcomelen = snprintf(welcome, sizeof(welcome),
+					  "4me version %s", FORME_VERSION);
+		if (welcomelen > config.screencols)
+		{
+		    welcomelen = config.screencols;
+		}
+
+		int padding = (config.screencols - welcomelen) / 2;
+		if (padding)
+		{
+		    str_buf_insert_char(renderb, renderb->size, '~');
+		    padding--;
+		}
+
+		while (padding--)
+		{
+		    str_buf_insert_char(renderb, renderb->size, ' ');
+		}
+
+		str_buf_append(renderb, cstrn(welcome, welcomelen));
+	    } else {
+		str_buf_insert_char(renderb, renderb->size, '~');
+	    }    
+	}
+	else
+	{
+	    struct row *row = buffer->row + filerow;
+	    int len = row->render_chars.size - buffer->cp.coloff;
+	    if (len < 0)
+	    {
+		len = 0;
+	    }
+	    if (len > config.screencols)
+	    {
+		len = config.screencols;
+	    }
+	    
+	    str_buf_append(renderb,
+			   cstrn(row->render_chars.data + buffer->cp.coloff, len));
+	}
+	
+	str_buf_append(renderb, cstrn("\x1b[K", 3));
+	str_buf_append(renderb, cstrn("\r\n", 2));
+    }
+}

@@ -23,4 +23,15 @@
 #define FORME_QUIT_TIMES 3
 #define FORME_NUMBER_OF_SPACES_FOR_TAB 4
 
+// temp
+
+struct cur_pos {
+    int x;
+    int y;
+    int r;
+    int rowoff;
+    int coloff;
+};
+
+
 #endif /* COMMON_H */

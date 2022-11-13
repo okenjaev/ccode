@@ -26,17 +26,15 @@ editor_open(const char* file_name)
 void
 editor_update()
 {
-    struct buffer* buffer = buffer_current();
     buffer_update();
-    render_draw(buffer);
+    render_draw();
     input_update();
 }
 
 void
 editor_exit(void)
 {
-    struct buffer* buffer = buffer_current();
     restore();
-    buffer_deinit(*buffer);
+    buffer_deinit();
     exit(0);
 }    

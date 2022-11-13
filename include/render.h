@@ -4,10 +4,9 @@
 #include "common.h"
 
 struct str_buf;
-struct buffer;
 
-void render_draw(const struct buffer*);
-    
+void render_draw(void);
+
 int
 render_flush(const struct str_buf str);
 

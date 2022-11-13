@@ -3,32 +3,19 @@
 
 #include "common.h"
 
-struct row;
+typedef void Buffer;
 
+const char*
+buffer_file_name(void);
 
-struct cur_pos {
-    int x;
-    int y;
-    int r;
-    int rowoff;
-    int coloff;
-};
+const struct cur_pos
+buffer_cur_pos(void);
 
-struct buffer
-{
-    struct cur_pos cp;
-    int dirty;
-    int num_rows;
-    char* file_name;
-    struct row *row;
-};
-
-
-struct buffer*
-buffer_current(void);
+const int
+buffer_dirty(void);
 
 void
-buffer_deinit(struct buffer);
+buffer_deinit();
 
 struct str_buf
 buffer_serialize(void);
@@ -75,5 +62,7 @@ buffer_open_file(const char* file_name);
 void
 buffer_save(void);
 
+void
+buffer_convert_to_render(struct str_buf* renderb);
 
 #endif /* BUFFER_H */

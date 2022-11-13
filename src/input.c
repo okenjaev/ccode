@@ -6,7 +6,8 @@
 #include "sys.h"
 #include "editor.h"
 
-void setkbd(char* map, void (*func)(void))
+void
+setkbd(char* map, void (*func)(void))
 {
     func();
 }
@@ -22,10 +23,9 @@ input_update(void)
     }
     else if (c == FORME_CTRL_KEY('o'))
     {
-	buffer_open_file("../txt");
+	buffer_open_file("txt");
     }
-    
-    
+        
     sm_set_message("%c", c);
 }
 
