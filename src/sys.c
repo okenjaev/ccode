@@ -7,10 +7,10 @@ struct config config;
 
 static
 void
-get_cursor_position(int *rows, int *cols)
+get_cursor_position(fint32 *rows, fint32 *cols)
 {
-    char buf[32];
-    unsigned int i = 0;
+    fchar buf[32];
+    fuint32 i = 0;
 
     if (write(STDOUT_FILENO, "\x1b[6n", 4) != 4)
     {
@@ -47,7 +47,7 @@ get_cursor_position(int *rows, int *cols)
 }
 
 void
-die(const char* s)
+die(const fchar* s)
 {
     restore();
     perror(s);
@@ -127,15 +127,15 @@ enable_raw_mode()
 
 // TODO: Maybe refactoring
 void
-load_file(struct str_buf* buf_str, const char* file_name)
+load_file(struct str_buf* buf_str, const fchar* file_name)
 {
-    int fp = open(file_name, O_RDONLY);
+    fint32 fp = open(file_name, O_RDONLY);
     if(fp == -1)
     {
 	die("file_open");
     }
 
-    int size = lseek(fp, 0, SEEK_END);
+    fint32 size = lseek(fp, 0, SEEK_END);
     str_buf_resize(buf_str, size);
     lseek(fp, 0, SEEK_SET);
     
@@ -159,10 +159,10 @@ load_file(struct str_buf* buf_str, const char* file_name)
     close(fp);
 }
 
-int
-write_to_file(const char* file_name, struct str_buf buffer_str)
+fint32
+write_to_file(const fchar* file_name, struct str_buf buffer_str)
 {
-    int fd = open(file_name, O_RDWR | O_CREAT, 0644);
+    fint32 fd = open(file_name, O_RDWR | O_CREAT, 0644);
     if (fd != -1)
     {
 	if (ftruncate(fd, buffer_str.size) != -1)
@@ -178,12 +178,12 @@ write_to_file(const char* file_name, struct str_buf buffer_str)
     return 0;
 }
 
-char
+fchar
 read_key()
 {
-    char c;
+    fchar c;
 
-    int nread;
+    fint32 nread;
     while((nread = read(STDIN_FILENO, &c, 1)) != 1)
     {
 	if (nread == -1 && errno != EAGAIN)

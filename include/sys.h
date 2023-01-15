@@ -7,13 +7,13 @@ struct buffer;
 struct str_buf;
 
 struct config {
-    int screenrows;
-    int screencols;  
+    fint32 screenrows;
+    fint32 screencols;  
     struct termios og_mode;    
 };
 
 void
-die(const char* s);
+die(const fchar* s);
 
 void
 get_window_size();
@@ -28,12 +28,12 @@ void
 restore();
 
 void
-load_file(struct str_buf* str_buf, const char* file_name);
+load_file(struct str_buf* str_buf, const fchar* file_name);
 
-int
-write_to_file(const char* file_name, struct str_buf buffer_str);
+fint32
+write_to_file(const fchar* file_name, struct str_buf buffer_str);
 
-char
+fchar
 read_key();
 
 #endif /* SYS_H */

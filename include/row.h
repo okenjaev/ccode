@@ -6,8 +6,8 @@
 
 struct row
 {
-    struct str_buf chars;
-    struct str_buf render_chars;
+    struct str_buf fchars;
+    struct str_buf render_fchars;
 };
 
 void
@@ -17,16 +17,16 @@ void
 row_deinit(struct row* row);
 
 void
-row_resize(struct row* row, int size);
+row_resize(struct row* row, fint32 size);
 
-int
-row_cx_to_rx(const struct row* row, int cx);
-
-void
-row_remove_char(struct row* row, int index);
+fint32
+row_cx_to_rx(const struct row* row, fint32 cx);
 
 void
-row_insert_char(struct row* row, int index, char c);
+row_remove_fchar(struct row* row, fint32 index);
+
+void
+row_insert_fchar(struct row* row, fint32 index, fchar c);
 
 void
 row_append_string(struct row* row, struct str_buf str);

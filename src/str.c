@@ -5,22 +5,22 @@
 /* str buf */
 
 struct str_buf
-str_buf_init(int capacity)
+str_buf_init(fint32 capacity)
 {
     struct str_buf value;
     value.capacity = capacity;
     value.size = 0;
-    value.data = malloc(sizeof(char) * value.capacity);
+    value.data = malloc(sizeof(fchar) * value.capacity);
     return value;
 }
 
 struct str_buf
-str_buf_init_raw(char* data, int size)
+str_buf_init_raw(fchar* data, fint32 size)
 {
     struct str_buf value;
     value.capacity = size;
     value.size = size;
-    value.data = malloc(sizeof(char) * value.capacity);
+    value.data = malloc(sizeof(fchar) * value.capacity);
 
     memcpy(value.data, data, value.size);
     return value;
@@ -48,7 +48,7 @@ str_buf_append(struct str_buf* str_buf, const struct str_buf str)
 }
 
 void
-str_buf_insert_char(struct str_buf* str_buf, int at_index, char c)
+str_buf_insert_fchar(struct str_buf* str_buf, fint32 at_index, fchar c)
 {
     if (str_buf->capacity < str_buf->size + 1)
     {
@@ -62,7 +62,7 @@ str_buf_insert_char(struct str_buf* str_buf, int at_index, char c)
 }
 
 void
-str_buf_remove_char(struct str_buf* str_buf, int at_index)
+str_buf_remove_fchar(struct str_buf* str_buf, fint32 at_index)
 {
     memmove(str_buf->data + at_index, str_buf->data + at_index + 1, str_buf->size - at_index);
     str_buf->size--;
@@ -70,7 +70,7 @@ str_buf_remove_char(struct str_buf* str_buf, int at_index)
 
 void
 str_buf_resize(struct str_buf* str_buf,
-	       int size)
+	       fint32 size)
 {
     str_buf->size = size;
     
@@ -84,12 +84,12 @@ str_buf_resize(struct str_buf* str_buf,
 struct str_buf
 str_buf_split(struct str_buf* str, const struct str_buf delim)
 {
-    int delimsize = delim.size;
+    fint32 delimsize = delim.size;
 
-    int i =0;
+    fint32 i =0;
     while(i < str->size - delimsize)
     {
-	char* at = i + str->data;
+	fchar* at = i + str->data;
 	struct str_buf temp = cstrn(at, delimsize);
 
 	if (str_buf_cmp(temp, delim))
@@ -106,7 +106,7 @@ str_buf_split(struct str_buf* str, const struct str_buf delim)
     return str_buf_nan;
 }
 
-int
+fint32
 str_buf_cmp(struct str_buf str, struct str_buf ano_str)
 {
     if (str.size != ano_str.size)
@@ -119,7 +119,7 @@ str_buf_cmp(struct str_buf str, struct str_buf ano_str)
 	return 1;
     }
 
-    for (int i=0; i<str.size; i++)
+    for (fint32 i=0; i<str.size; i++)
     {
 	if (str.data[i] != ano_str.data[i])
 	{
@@ -136,7 +136,7 @@ str_buf_copy(const struct str_buf str)
     struct str_buf res;
     res.size = str.size;
     res.capacity = str.capacity;
-    res.data = malloc(sizeof(char) * res.size);
+    res.data = malloc(sizeof(fchar) * res.size);
     memcpy(res.data, str.data, res.capacity);
     return res;
 }

@@ -3,7 +3,7 @@
 struct sm sm;
 
 void
-sm_set_message(const char* fmt, ...)
+sm_set_message(const fchar* fmt, ...)
 {
     va_list ap;
     va_start(ap, fmt);

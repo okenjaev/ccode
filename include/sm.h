@@ -6,10 +6,10 @@
 struct sm
 {
     time_t time;
-    char message[80];
+    fchar message[80];
 };
 
 void
-sm_set_message(const char* fmt, ...);
+sm_set_message(const fchar* fmt, ...);
 
 #endif /* SM_H */

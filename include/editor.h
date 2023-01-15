@@ -4,7 +4,7 @@
 #include "common.h"
 
 void
-editor_set_status_message(const char* fmt, ...);
+editor_set_status_message(const fchar* fmt, ...);
 
 void
 editor_init();
@@ -13,7 +13,7 @@ void
 editor_update();
 
 void
-editor_open(const char* file_name);
+editor_open(const fchar* file_name);
 
 void
 editor_exit(void);

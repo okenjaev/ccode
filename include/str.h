@@ -5,9 +5,9 @@
 
 struct str_buf
 {
-    char* data;
-    int size;
-    int capacity;
+    fchar* data;
+    fint32 size;
+    fint32 capacity;
 };  // mutable
 
 #define str_buf_nan (struct str_buf){.data = NULL, .size = -1}
@@ -15,23 +15,23 @@ struct str_buf
 #define cstrn(x, y) (struct str_buf){.data = x, .size = y}
 
 struct str_buf
-str_buf_init(int);
+str_buf_init(fint32);
 
 void
 str_buf_deinit(struct str_buf*);
 
 void
-str_buf_insert_char(struct str_buf* str_buf,
-		    int at_index,
-		    char c);
+str_buf_insert_fchar(struct str_buf* str_buf,
+		    fint32 at_index,
+		    fchar c);
 
 void
-str_buf_remove_char(struct str_buf* str_buf,
-		    int at_index);
+str_buf_remove_fchar(struct str_buf* str_buf,
+		    fint32 at_index);
 
 void
 str_buf_resize(struct str_buf* str_buf,
-	       int size);
+	       fint32 size);
 
 void
 str_buf_append(struct str_buf*,
@@ -40,7 +40,7 @@ str_buf_append(struct str_buf*,
 struct str_buf
 str_buf_copy(const struct str_buf str);
 
-int
+fint32
 str_buf_cmp(struct str_buf str, struct str_buf ano_str);
 
 struct str_buf

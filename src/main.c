@@ -1,7 +1,7 @@
 #include "editor.h"
 
-int
-main(int argc, char *argv[])
+fint32
+main(fint32 argc, fchar *argv[])
 {
     editor_init();
 

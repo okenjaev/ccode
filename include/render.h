@@ -8,7 +8,7 @@ struct buffer;
 
 void render_draw(const struct buffer*);
     
-int
+fint32
 render_flush(const struct str_buf str);
 
 #endif /* RENDER_H */

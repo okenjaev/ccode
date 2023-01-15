@@ -6,12 +6,12 @@
 #include "buffer.h"
 #include "editor.h"
 
-static int numargs=0;
+static fint32 numargs=0;
 
 static PyObject*
 insert(PyObject *self, PyObject *args)
 {
-    char* c;
+    fchar* c;
     if(!PyArg_ParseTuple(args, "s", &c))
         return NULL;
 
@@ -23,7 +23,7 @@ insert(PyObject *self, PyObject *args)
 	}
 	else
 	{
-	    buffer_insert_char(*c);
+	    buffer_insert_fchar(*c);
 	}
 	c++;
     }
@@ -34,11 +34,11 @@ insert(PyObject *self, PyObject *args)
 static PyObject*
 previous(PyObject* self, PyObject *args)
 {
-    int t = 1;
+    fint32 t = 1;
     if (!PyArg_ParseTuple(args, "|i", &t))
 	return NULL;
 
-    for(int i = 0; i < t; i++)
+    for(fint32 i = 0; i < t; i++)
 	buffer_cursor_previous();
 
     return Py_None;
@@ -47,11 +47,11 @@ previous(PyObject* self, PyObject *args)
 static PyObject*
 next(PyObject* self, PyObject *args)
 {
-    int t = 1;
+    fint32 t = 1;
     if (!PyArg_ParseTuple(args, "|i", &t))
 	return NULL;
 
-    for(int i = 0; i < t; i++)
+    for(fint32 i = 0; i < t; i++)
 	buffer_cursor_next();
 
     return Py_None;
@@ -60,11 +60,11 @@ next(PyObject* self, PyObject *args)
 static PyObject*
 forward(PyObject* self, PyObject *args)
 {
-    int t = 1;
+    fint32 t = 1;
     if (!PyArg_ParseTuple(args, "|i", &t))
 	return NULL;
 
-    for(int i = 0; i < t; i++)
+    for(fint32 i = 0; i < t; i++)
 	buffer_cursor_forward();
 
     return Py_None;
@@ -73,11 +73,11 @@ forward(PyObject* self, PyObject *args)
 static PyObject*
 backward(PyObject* self, PyObject *args)
 {
-    int t = 1;
+    fint32 t = 1;
     if (!PyArg_ParseTuple(args, "|i", &t))
 	return NULL;
 
-    for(int i = 0; i < t; i++)
+    for(fint32 i = 0; i < t; i++)
         buffer_cursor_backward();
 
     return Py_None;
@@ -100,7 +100,7 @@ save(PyObject* self, PyObject* Py_UNUSED(args))
 static PyObject*
 open_file(PyObject* self, PyObject* args)
 {
-    char* s;
+    fchar* s;
     if(!PyArg_ParseTuple(args, "s", &s))
         return NULL;
 

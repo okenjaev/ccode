@@ -18,7 +18,7 @@ editor_init()
 }
 
 void
-editor_open(const char* file_name)
+editor_open(const fchar* file_name)
 {
     buffer_open_file(file_name);
 }

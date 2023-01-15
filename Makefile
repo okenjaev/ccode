@@ -1,7 +1,7 @@
 
 CC ?= gcc
-CFLAGS := -Iinclude/ -O3 -lpython3.10
-DBGFLAGS := -g -fsanitize=address -Wall
+CFLAGS := -Iinclude/ -O2 -lpython3.10 -std=c11
+DBGFLAGS := -g -fsanitize=address -Wall -std=c11
 COBJFLAGS := $(CFLAGS) -c
 
 # path macros

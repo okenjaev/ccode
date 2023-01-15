@@ -7,19 +7,19 @@ struct row;
 
 
 struct cur_pos {
-    int x;
-    int y;
-    int r;
-    int rowoff;
-    int coloff;
+    fint32 x;
+    fint32 y;
+    fint32 r;
+    fint32 rowoff;
+    fint32 coloff;
 };
 
 struct buffer
 {
     struct cur_pos cp;
-    int dirty;
-    int num_rows;
-    char* file_name;
+    fint32 dirty;
+    fint32 num_rows;
+    fchar* file_name;
     struct row *row;
 };
 
@@ -34,10 +34,10 @@ struct str_buf
 buffer_serialize(void);
 
 void
-buffer_append_row(int, struct str_buf);
+buffer_append_row(fint32, struct str_buf);
 
 void
-buffer_delete_row(int);
+buffer_delete_row(fint32);
 
 void
 buffer_update(void);
@@ -52,10 +52,10 @@ void
 buffer_insert_row(void);
 
 void
-buffer_insert_char(char c);
+buffer_insert_fchar(fchar c);
 
 void
-buffer_remove_char(void);
+buffer_remove_fchar(void);
 
 void
 buffer_cursor_previous(void);
@@ -70,7 +70,7 @@ void
 buffer_cursor_backward(void);
 
 void
-buffer_open_file(const char* file_name);
+buffer_open_file(const fchar* file_name);
 
 void
 buffer_save(void);

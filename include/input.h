@@ -3,8 +3,6 @@
 
 #include "common.h"
 
-#define NUMBER_OF_KBDS 4
-
 void
 input_update(void);
 

@@ -16,7 +16,7 @@ buffer_current(void)
 }
 
 void
-buffer_delete_row(int index)
+buffer_delete_row(fint32 index)
 {
     struct buffer* buffer = buffer_current();
     
@@ -24,7 +24,7 @@ buffer_delete_row(int index)
     {
 	return;
     }
-    
+        
     struct row* row = buffer->row + index;
     row_deinit(row);    
     memmove(row, row + 1, sizeof(struct row) * (buffer->num_rows - index -1));
@@ -64,7 +64,7 @@ buffer_update(void)
 }
 
 void
-buffer_append_row(int at_line, struct str_buf str)
+buffer_append_row(fint32 at_line, struct str_buf str)
 {
     struct buffer* buffer = buffer_current();
 
@@ -94,11 +94,11 @@ buffer_serialize(void)
 
     struct str_buf res = str_buf_init(50);
     
-    for (int i = 0; i < buffer->num_rows; i++)
+    for (fint32 i = 0; i < buffer->num_rows; i++)
     {
 	struct row* cur_row = buffer->row + i;
-	str_buf_append(&res, cur_row->chars);
-	str_buf_insert_char(&res, res.size, '\n');
+	str_buf_append(&res, cur_row->fchars);
+	str_buf_insert_fchar(&res, res.size, '\n');
     }
     
     return res;
@@ -108,7 +108,7 @@ void
 buffer_deinit(struct buffer buffer)
 {
     free(buffer.file_name);
-    for (int i = buffer.num_rows - 1; i >= 0; i--)
+    for (fint32 i = buffer.num_rows - 1; i >= 0; i--)
     {
 	row_deinit(i + buffer.row);
     }
@@ -145,7 +145,7 @@ buffer_insert_row(void)
     else
     {
 	struct row *row = buffer->row + buffer->cp.y;
-	buffer_append_row(buffer->cp.y + 1, cstrn(row->chars.data + buffer->cp.x, row->chars.size - buffer->cp.x));
+	buffer_append_row(buffer->cp.y + 1, cstrn(row->fchars.data + buffer->cp.x, row->fchars.size - buffer->cp.x));
 	row = buffer->row + buffer->cp.y;
 	row_resize(row, buffer->cp.x);
     }
@@ -154,11 +154,11 @@ buffer_insert_row(void)
 }
 
 void
-buffer_insert_char(char c)
+buffer_insert_fchar(fchar c)
 {
     struct buffer* buffer = buffer_current();
 
-    int index = buffer->cp.x;
+    fint32 index = buffer->cp.x;
     
     if (buffer->cp.y == buffer->num_rows)
     {
@@ -166,13 +166,13 @@ buffer_insert_char(char c)
     }
     
     struct row* row = buffer->row + buffer->cp.y;
-    row_insert_char(row, index, c);
+    row_insert_fchar(row, index, c);
     buffer->cp.x++;
     buffer->dirty++;
 }
 
 void
-buffer_remove_char(void)
+buffer_remove_fchar(void)
 {
     struct buffer* buffer = buffer_current();
 
@@ -191,14 +191,14 @@ buffer_remove_char(void)
     if (buffer->cp.x > 0)
     {
 	struct row* row = buffer->row + buffer->cp.y;
-	row_remove_char(row, buffer->cp.x - 1);
+	row_remove_fchar(row, buffer->cp.x - 1);
 	buffer->cp.x--;
 	buffer->dirty++;
     }
     else
     {
-	buffer->cp.x = buffer->row[buffer->cp.y - 1].chars.size;
-	row_append_string(&buffer->row[buffer->cp.y - 1], cstrn(row->chars.data, row->chars.size));
+	buffer->cp.x = buffer->row[buffer->cp.y - 1].fchars.size;
+	row_append_string(&buffer->row[buffer->cp.y - 1], cstrn(row->fchars.data, row->fchars.size));
 	buffer_delete_row(buffer->cp.y);
 	buffer->cp.y--;
 	buffer->dirty++;
@@ -218,7 +218,7 @@ buffer_cursor_previous(void)
     }
 
     row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y];
-    int rowlen = row ? row->chars.size : 0;
+    fint32 rowlen = row ? row->fchars.size : 0;
     if (buffer->cp.x > rowlen)
     {
 	buffer->cp.x = rowlen;
@@ -238,7 +238,7 @@ buffer_cursor_next(void)
     }
 
     row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y];
-    int rowlen = row ? row->chars.size : 0;
+    fint32 rowlen = row ? row->fchars.size : 0;
     if (buffer->cp.x > rowlen)
     {
 	buffer->cp.x = rowlen;
@@ -252,18 +252,18 @@ buffer_cursor_forward(void)
 
     struct row* row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y]; 
     
-    if (row && buffer->cp.x < row->chars.size)
+    if (row && buffer->cp.x < row->fchars.size)
     {
 	buffer->cp.x++;	    	    
     }
-    else if (row && buffer->cp.x == row->chars.size)
+    else if (row && buffer->cp.x == row->fchars.size)
     {
 	buffer->cp.y++;
 	buffer->cp.x = 0;
     }
 
     row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y];
-    int rowlen = row ? row->chars.size : 0;
+    fint32 rowlen = row ? row->fchars.size : 0;
     if (buffer->cp.x > rowlen)
     {
 	buffer->cp.x = rowlen;
@@ -284,11 +284,11 @@ buffer_cursor_backward(void)
     else if (buffer->cp.y > 0)
     {
 	buffer->cp.y--;
-	buffer->cp.x = buffer->row[buffer->cp.y].chars.size;
+	buffer->cp.x = buffer->row[buffer->cp.y].fchars.size;
     }
     
     row = (buffer->cp.y >= buffer->num_rows) ? NULL : &buffer->row[buffer->cp.y];
-    int rowlen = row ? row->chars.size : 0;
+    fint32 rowlen = row ? row->fchars.size : 0;
     if (buffer->cp.x > rowlen)
     {
 	buffer->cp.x = rowlen;
@@ -296,7 +296,7 @@ buffer_cursor_backward(void)
 }
 
 void
-buffer_open_file(const char* file_name)
+buffer_open_file(const fchar* file_name)
 {
     struct buffer* buffer = buffer_current();
 
