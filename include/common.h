@@ -19,7 +19,6 @@
 #include <stdint.h>
 
 #define FORME_VERSION "0.0.5"
-#define FORME_CTRL_KEY(k) ((k) & 0x1f)
 
 #define FORME_QUIT_TIMES 3
 #define FORME_NUMBER_OF_SPACES_FOR_TAB 4
