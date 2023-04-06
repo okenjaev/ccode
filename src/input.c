@@ -7,6 +7,11 @@
 #include "editor.h"
 
 #define FME_CTRL_KEY(k) ((k) & 0x1f)
+#define NUMBER_OF_HOT_KEYS 4
+#define ASCII_CNTRL_OFFSET 96
+#define ASCII_CNTRL_UPPER_LIMIT 32
+
+// TODO: NEED TO BE REFACTORED
 
 static
 void
@@ -14,11 +19,16 @@ input_empty_hk_buf(void);
 
 static fchar last_key = 0;
 
+
+// If * is inserted in hotkey string
+// then it should be evaluated dispate
+// buffer is not empty
+
 static fchar* hotkeys[] =
 {
-    "ctrl-x ctrl-c",
-    "ctrl-n",
-    "ctrl-g",
+    "ctrl-x ctrl-c", // exit
+    "ctrl-n", // next line
+    "*ctrl-g", // discard hotkeys
     "ctrl-m", // enter
 };
 
@@ -45,15 +55,29 @@ input_update(void)
     fchar c = read_key();
     fint32 filled_buf = strlen(buf);
     
-    if (c < 32) // last control-key is 31
+    if (c < ASCII_CNTRL_UPPER_LIMIT) // last control-key is 31
     {
+	// Temp in order to avoid program halt 
 	if (c == FME_CTRL_KEY('q'))
 	{
 	    editor_exit();
 	}
 
 	fchar temp[10];
-	sprintf(temp, "ctrl-%c", c + 96);
+	sprintf(temp, "ctrl-%c", c + ASCII_CNTRL_OFFSET);
+
+	for (fint32 i = 0; i < NUMBER_OF_HOT_KEYS; i++)
+	{
+	    fchar* hk = hotkeys[i];
+	    if (*hk == '*')
+	    {
+		if (strcmp((hk + 1), temp) == 0)
+		{
+		    actions[i]();
+		}
+	    }
+	}
+
 	strncat(buf, temp, 10);
     }
     else
@@ -70,7 +94,7 @@ input_update(void)
 
     fint32 found = 0;
     fint32 maxlen = 0;
-    for (fint32 i = 0; i < 4; i++)
+    for (fint32 i = 0; i < NUMBER_OF_HOT_KEYS; i++)
     {
 	fchar* data = hotkeys[i];
 	fint32 size = strlen(data);
