@@ -5,43 +5,24 @@
 #include "py_int.h"
 #include "sys.h"
 #include "editor.h"
+#include "hk.h"
 
 #define FME_CTRL_KEY(k) ((k) & 0x1f)
-#define NUMBER_OF_HOT_KEYS 4
+#define NUMBER_OF_HOT_KEYS 5
 #define ASCII_CNTRL_OFFSET 96
 #define ASCII_CNTRL_UPPER_LIMIT 32
 
 // TODO: NEED TO BE REFACTORED
 
-static
-void
-input_empty_hk_buf(void);
-
-static fchar last_key = 0;
-
-
 // If * is inserted in hotkey string
 // then it should be evaluated dispate
 // buffer is not empty
 
-static fchar* hotkeys[] =
-{
-    "ctrl-x ctrl-c", // exit
-    "ctrl-n", // next line
-    "*ctrl-g", // discard hotkeys
-    "ctrl-m", // enter
-};
+fchar buf[100];
+fint32 size = 8;
+static struct fhk* hotkeys;
 
-void (*actions[])(void) =
-{
-    editor_exit,
-    buffer_cursor_next,
-    input_empty_hk_buf,
-    buffer_insert_row
-};
-
-fchar buf[100] = {0};
-
+static
 void
 input_empty_hk_buf(void)
 {
@@ -50,30 +31,41 @@ input_empty_hk_buf(void)
 }
 
 void
+input_init(void)
+{
+    hotkeys = malloc(sizeof(struct fhk) * size);
+    hotkeys[0] = (struct fhk){"ctrl-x ctrl-c", editor_exit};
+    hotkeys[1] = (struct fhk){"*ctrl-g", input_empty_hk_buf};
+    hotkeys[2] = (struct fhk){"ctrl-d", buffer_remove_fchar};
+    hotkeys[3] = (struct fhk){"ctrl-p", buffer_cursor_previous};
+    hotkeys[4] = (struct fhk){"ctrl-n", buffer_cursor_next};
+    hotkeys[5] = (struct fhk){"ctrl-f", buffer_cursor_forward};
+    hotkeys[6] = (struct fhk){"ctrl-b", buffer_cursor_backward};
+    hotkeys[7] = (struct fhk){"ctrl-m", buffer_insert_row};
+}
+
+void
 input_update(void)
 {    
     fchar c = read_key();
     fint32 filled_buf = strlen(buf);
     
-    if (c < ASCII_CNTRL_UPPER_LIMIT) // last control-key is 31
+    if (c < ASCII_CNTRL_UPPER_LIMIT)
     {
 	// Temp in order to avoid program halt 
-	if (c == FME_CTRL_KEY('q'))
-	{
-	    editor_exit();
-	}
-
 	fchar temp[10];
 	sprintf(temp, "ctrl-%c", c + ASCII_CNTRL_OFFSET);
 
-	for (fint32 i = 0; i < NUMBER_OF_HOT_KEYS; i++)
+	for (fint32 i = 0; i < size; i++)
 	{
-	    fchar* hk = hotkeys[i];
-	    if (*hk == '*')
+	    struct fhk hk = hotkeys[i];
+	    fchar* text = hk.text;
+	    if (*text == '*')
 	    {
-		if (strcmp((hk + 1), temp) == 0)
+		if (strcmp(text + 1, temp) == 0)
 		{
-		    actions[i]();
+		    hk.action();
+		    return;
 		}
 	    }
 	}
@@ -94,18 +86,18 @@ input_update(void)
 
     fint32 found = 0;
     fint32 maxlen = 0;
-    for (fint32 i = 0; i < NUMBER_OF_HOT_KEYS; i++)
+    for (fint32 i = 0; i < size; i++)
     {
-	fchar* data = hotkeys[i];
-	fint32 size = strlen(data);
+	struct fhk data = hotkeys[i];
+	fint32 size = strlen(data.text);
 	if (maxlen < size)
 	{
 	    maxlen = size;
 	}
-	if (strcmp(data, buf) == 0)
+	if (strcmp(data.text, buf) == 0)
 	{
 	    found = 1;
-	    actions[i]();
+	    data.action();
 	    memset(buf, 0, 100);
 	}
     }
@@ -125,3 +117,8 @@ input_update(void)
     }
 }
 
+void
+input_deinit(void)
+{
+    free(hotkeys);
+}

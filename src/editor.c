@@ -15,6 +15,8 @@ editor_init()
     enable_raw_mode();
     get_window_size();
     config.screenrows -= 2;
+
+    input_init();
 }
 
 void
@@ -38,5 +40,7 @@ editor_exit(void)
     struct buffer* buffer = buffer_current();
     restore();
     buffer_deinit(*buffer);
+
+    input_deinit();
     exit(0);
 }    
