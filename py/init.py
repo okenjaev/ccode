@@ -1,0 +1,1 @@
+insert("hello, world")

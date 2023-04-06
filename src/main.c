@@ -9,7 +9,7 @@ main(fint32 argc, fchar *argv[])
     {
 	editor_open(argv[1]);
     }
-    
+
     while(1)
     {
 	editor_update();
