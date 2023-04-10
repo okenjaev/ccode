@@ -3,7 +3,7 @@
 fint32
 main(fint32 argc, fchar *argv[])
 {
-    editor_init();
+    editor_init(argv);
 
     if (argc >= 2)
     {

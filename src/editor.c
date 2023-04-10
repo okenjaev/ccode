@@ -10,13 +10,15 @@
 extern struct config config;
 
 void
-editor_init()
+editor_init(char* argv[])
 {
     enable_raw_mode();
     get_window_size();
     config.screenrows -= 2;
 
     input_init();
+
+    py_init(argv);
 }
 
 void
@@ -40,7 +42,7 @@ editor_exit(void)
     struct buffer* buffer = buffer_current();
     restore();
     buffer_deinit(*buffer);
-
+    py_deinit();
     input_deinit();
     exit(0);
 }    

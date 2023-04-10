@@ -5,6 +5,7 @@
 #include "sys.h"
 #include "buffer.h"
 #include "editor.h"
+#include "input.h"
 
 static fint32 numargs=0;
 
@@ -109,6 +110,25 @@ open_file(PyObject* self, PyObject* args)
     return Py_None;
 }
 
+static PyObject*
+set_kbd(PyObject* self, PyObject* args)
+{
+    PyObject *call_back = NULL;
+    if (!PyArg_ParseTuple(args, "O:set_callback", &call_back))
+    {
+	return NULL;
+    }
+
+    if (!PyCallable_Check(call_back))
+    {
+	PyErr_SetString(PyExc_TypeError, "parameter must be callable");
+	return NULL;
+    }
+    Py_XINCREF(call_back);
+    input_add_hotkey("asd", call_back);
+    return Py_None;
+}
+
 static PyMethodDef fme_methods[] = {
     {"insert", insert, METH_VARARGS,
      "insert string in the current buffer"},
@@ -119,6 +139,7 @@ static PyMethodDef fme_methods[] = {
     {"quit", quit, METH_NOARGS, "exit 4me"},
     {"save", save, METH_NOARGS, "save the current buffer"},
     {"open_file", open_file, METH_VARARGS, "opens file with relative path"},
+    {"set_kbd", set_kbd, METH_VARARGS, "set keyboard binding"},
     {NULL, NULL, 0, NULL}
 };
 
@@ -133,8 +154,10 @@ PyInit_fme(void)
     return PyModule_Create(&fme_module);
 }
 
+static wchar_t *program;
+
 void
-py_run(void)
+py_init(char* argv[])
 {
     FILE *fp = fopen("py/init.py", "r");
 
@@ -143,7 +166,7 @@ py_run(void)
 	return;
     }
 
-    wchar_t *program = Py_DecodeLocale("./4me", NULL);
+    program = Py_DecodeLocale(argv[0], NULL);
     if (program == NULL)
     {
 	die("py program exited");
@@ -156,16 +179,22 @@ py_run(void)
     }
     
     Py_SetProgramName(program);
-
     Py_Initialize();
 
-    PyRun_SimpleFile(fp, "py/init.py");
+    int result = PyRun_SimpleFile(fp, "py/init.py");
+    sm_set_message("%d", result);
     
+    fclose(fp);
+}
+
+
+void
+py_deinit(void)
+{
     if (Py_FinalizeEx() < 0)
     {
 	die("py finalize ex");
     }
-    
+
     PyMem_RawFree(program);
-    fclose(fp);
 }

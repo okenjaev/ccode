@@ -7,7 +7,7 @@ void
 editor_set_status_message(const fchar* fmt, ...);
 
 void
-editor_init();
+editor_init(char* argv[]);
 
 void
 editor_update();
