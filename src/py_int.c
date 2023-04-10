@@ -142,15 +142,20 @@ py_run(void)
     {
 	return;
     }
-    
+
     wchar_t *program = Py_DecodeLocale("./4me", NULL);
     if (program == NULL)
     {
 	die("py program exited");
     }
 
+    if (PyImport_AppendInittab("fme", &PyInit_fme) == -1 )
+    {
+	fprintf(stderr, "Error: could not fme\n");
+	die("Error");
+    }
+    
     Py_SetProgramName(program);
-    PyImport_AppendInittab("fme", &PyInit_fme);
 
     Py_Initialize();
 

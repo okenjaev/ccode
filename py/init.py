@@ -1,1 +1,3 @@
-insert("hello, world")
+import fme
+
+fme.insert("hello, world")
