@@ -1,4 +1,4 @@
-#include "py_int.h"
+#include "interp.h"
 
 #include <python3.10/Python.h>
 
@@ -125,7 +125,7 @@ set_kbd(PyObject* self, PyObject* args)
 	return NULL;
     }
     Py_XINCREF(call_back);
-    input_add_hotkey("asd", call_back);
+    input_add_hotkey(call_back);
     return Py_None;
 }
 
@@ -157,7 +157,7 @@ PyInit_fme(void)
 static wchar_t *program;
 
 void
-py_init(char* argv[])
+interp_init(char* argv[])
 {
     FILE *fp = fopen("py/init.py", "r");
 
@@ -182,14 +182,12 @@ py_init(char* argv[])
     Py_Initialize();
 
     int result = PyRun_SimpleFile(fp, "py/init.py");
-    sm_set_message("%d", result);
-    
     fclose(fp);
 }
 
 
 void
-py_deinit(void)
+interp_deinit(void)
 {
     if (Py_FinalizeEx() < 0)
     {
@@ -197,4 +195,11 @@ py_deinit(void)
     }
 
     PyMem_RawFree(program);
+}
+
+void
+interp_call(void* func)
+{
+    PyObject *result;
+    result = PyObject_CallObject(func, NULL);
 }

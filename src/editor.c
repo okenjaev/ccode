@@ -6,6 +6,7 @@
 #include "row.h"
 #include "sm.h"
 #include "buffer.h"
+#include "interp.h"
 
 extern struct config config;
 
@@ -18,7 +19,7 @@ editor_init(char* argv[])
 
     input_init();
 
-    py_init(argv);
+    interp_init(argv);
 }
 
 void
@@ -42,7 +43,7 @@ editor_exit(void)
     struct buffer* buffer = buffer_current();
     restore();
     buffer_deinit(*buffer);
-    py_deinit();
+    interp_deinit();
     input_deinit();
     exit(0);
 }    

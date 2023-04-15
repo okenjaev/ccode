@@ -6,9 +6,12 @@
 #include "common.h"
 
 void
-py_init(char* argv[]);
+interp_init(char* argv[]);
 
 void
-py_deinit(void);
+interp_deinit(void);
+
+void
+interp_call(void* func);
 
 #endif /* PY_INT_H */

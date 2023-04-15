@@ -1,9 +1,9 @@
-#include "hk.h"
+#include "hotkey.h"
 
-struct fhk
-fhk_init(const fchar* text, PyObject* call_back)
+struct hotkey
+hotkey_init(const fchar* text, void* call_back)
 {
-    struct fhk res;
+    struct hotkey res;
     res.text = malloc(sizeof(text));
     memcpy(res.text, text, sizeof(text));
     res.call_back = call_back;
