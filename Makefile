@@ -1,71 +1,27 @@
+TARGET = 4me
 
-CC ?= gcc
-CFLAGS := -Iinclude/ -O2 -lpython3.10 -std=c11
-DBGFLAGS := -g -fsanitize=address -Wall -std=c11
-COBJFLAGS := $(CFLAGS) -c
+CC = gcc
+CFLAGS = -I$(INCLUDE_DIR) -Wall -g -fsanitize=address
+LFLAGS = -lpython3.10 -fsanitize=address
 
-# path macros
-BIN_PATH := bin
-OBJ_PATH := bin-obj
-SRC_PATH := src
-DBG_PATH := bin-debug
+SRC_DIR = src
+BUILD_DIR = bin
+OBJ_DIR = $(BUILD_DIR)/objs
+INCLUDE_DIR = include
 
-# compile macros
-TARGET_NAME := 4me
-ifeq ($(OS),Windows_NT)
-	TARGET_NAME := $(addsuffix .exe,$(TARGET_NAME))
-endif
-TARGET := $(BIN_PATH)/$(TARGET_NAME)
-TARGET_DEBUG := $(DBG_PATH)/$(TARGET_NAME)
+SRCS := $(wildcard $(SRC_DIR)/*.c)
+OBJS := $(patsubst $(SRC_DIR)/%.c, $(OBJ_DIR)/%.o, $(SRCS))
 
-# src files & obj files
-SRC := $(foreach x, $(SRC_PATH), $(wildcard $(addprefix $(x)/*,.c)))
-OBJ := $(addprefix $(OBJ_PATH)/, $(addsuffix .o, $(notdir $(basename $(SRC)))))
-OBJ_DEBUG := $(addprefix $(DBG_PATH)/, $(addsuffix .o, $(notdir $(basename $(SRC)))))
+default: $(OBJ_DIR) $(BUILD_DIR)/$(TARGET)
 
-# clean files list
-DISTCLEAN_LIST := $(OBJ) \
-                  $(OBJ_DEBUG) \
+$(OBJ_DIR):
+	mkdir -p $(OBJ_DIR)
 
-CLEAN_LIST := $(TARGET) \
-			  $(TARGET_DEBUG) \
-			  $(DISTCLEAN_LIST)
+$(BUILD_DIR)/$(TARGET): $(OBJS)
+	$(CC) -o $@ $^ $(LFLAGS)
 
-# default rule
-default: makedir all
-
-# non-phony targets
-$(TARGET): $(OBJ)
-	$(CC) -o $@ $(OBJ) $(CFLAGS)
-
-$(OBJ_PATH)/%.o: $(SRC_PATH)/%.c*
-	$(CC) $(COBJFLAGS) -o $@ $<
-
-$(DBG_PATH)/%.o: $(SRC_PATH)/%.c*
-	$(CC) $(COBJFLAGS) $(DBGFLAGS) -o $@ $<
-
-$(TARGET_DEBUG): $(OBJ_DEBUG)
-	$(CC) $(CFLAGS) $(DBGFLAGS) $(OBJ_DEBUG) -o $@
-
-# phony rules
-.PHONY: makedir all debug clean distclean
-
-makedir:
-	@mkdir -p $(BIN_PATH) $(OBJ_PATH) $(DBG_PATH)
-	@cp -rf py $(BIN_PATH)
-	@cp -rf py $(DBG_PATH)
-
-all: $(TARGET)
-
-debug: $(TARGET_DEBUG)
-
-r:
-	$(TARGET)
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
+	$(CC) -c -o $@ $^ $(CFLAGS)
 
 clean:
-	@echo CLEAN $(CLEAN_LIST)
-	@rm -f $(CLEAN_LIST)
-
-distclean:
-	@echo CLEAN $(DISTCLEAN_LIST)
-	@rm -f $(DISTCLEAN_LIST)
+	rm -rf $(BUILD_DIR)

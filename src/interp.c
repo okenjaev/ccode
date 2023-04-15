@@ -16,7 +16,7 @@ insert(PyObject *self, PyObject *args)
     if(!PyArg_ParseTuple(args, "s", &c))
         return NULL;
 
-    while(*c != '\0')
+    while(*c)
     {
 	if (*c == '\n')
 	{
@@ -130,16 +130,15 @@ set_kbd(PyObject* self, PyObject* args)
 }
 
 static PyMethodDef fme_methods[] = {
-    {"insert", insert, METH_VARARGS,
-     "insert string in the current buffer"},
-    {"previous", previous, METH_VARARGS, "moves cursor to previous line"},
-    {"next", next, METH_VARARGS, "moves cursor to next line"},
-    {"forward", forward, METH_VARARGS, "moves cursor to forward at the same line"},
-    {"backward", backward, METH_VARARGS, "moves cursor to backward at the same line"},
-    {"quit", quit, METH_NOARGS, "exit 4me"},
-    {"save", save, METH_NOARGS, "save the current buffer"},
-    {"open_file", open_file, METH_VARARGS, "opens file with relative path"},
-    {"set_kbd", set_kbd, METH_VARARGS, "set keyboard binding"},
+    {"insert", insert, METH_VARARGS, "insert string in the current buffer" },
+    {"previous", previous, METH_VARARGS, "moves cursor to previous line" },
+    {"next", next, METH_VARARGS, "moves cursor to next line" },
+    {"forward", forward, METH_VARARGS, "moves cursor to forward at the same line" },
+    {"backward", backward, METH_VARARGS, "moves cursor to backward at the same line" },
+    {"quit", quit, METH_NOARGS, "exit 4me" },
+    {"save", save, METH_NOARGS, "save the current buffer" },
+    {"open_file", open_file, METH_VARARGS, "opens file with relative path" },
+    {"set_kbd", set_kbd, METH_VARARGS, "set keyboard binding" },
     {NULL, NULL, 0, NULL}
 };
 
@@ -181,7 +180,13 @@ interp_init(char* argv[])
     Py_SetProgramName(program);
     Py_Initialize();
 
-    int result = PyRun_SimpleFile(fp, "py/init.py");
+    PyObject *pmodule = PyImport_ImportModule("fme");
+    if (!pmodule) {
+        PyErr_Print();
+        fprintf(stderr, "Error: could not import module fme");
+    }
+    
+    PyRun_SimpleFile(fp, "py/init.py");
     fclose(fp);
 }
 
@@ -189,12 +194,15 @@ interp_init(char* argv[])
 void
 interp_deinit(void)
 {
-    if (Py_FinalizeEx() < 0)
+    if (program)
     {
-	die("py finalize ex");
-    }
+	if (Py_FinalizeEx() < 0)
+	{
+	    die("py finalize ex");
+	}
 
-    PyMem_RawFree(program);
+	PyMem_RawFree(program);
+    }
 }
 
 void
