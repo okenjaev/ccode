@@ -14,4 +14,7 @@ interp_deinit(void);
 void
 interp_call(void* func);
 
+void
+interp_release(void* func);
+
 #endif /* PY_INT_H */

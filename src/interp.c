@@ -125,7 +125,7 @@ set_kbd(PyObject* self, PyObject* args)
 	return NULL;
     }
     Py_XINCREF(call_back);
-    input_add_hotkey(call_back);
+    input_add_hotkey("cx", call_back);
     return Py_None;
 }
 
@@ -210,4 +210,10 @@ interp_call(void* func)
 {
     PyObject *result;
     result = PyObject_CallObject(func, NULL);
+}
+
+void
+interp_release(void* func)
+{
+    Py_XDECREF((PyObject*)func);
 }
