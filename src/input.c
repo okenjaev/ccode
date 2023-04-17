@@ -9,6 +9,12 @@
 
 #define in_ctrl(x) (x & 0x1F)
 
+struct hotkey
+{
+    char* text;
+    void* func;
+};
+
 static darray(struct hotkey) hotkeys;
 
 void
@@ -30,7 +36,7 @@ input_update(void)
 
     if (c < 32)
     {
-	detect_key();
+	/* detect_key(); */
 	return;
     }
     
@@ -48,7 +54,7 @@ input_deinit(void)
     for (int i=0; i < darray_size(hotkeys); i++)
     {
 	struct hotkey hk = hotkeys[i];
-	interp_release((void*)hk.call_back);
+	interp_release((void*)hk.func);
     }
     
     darray_free(hotkeys);

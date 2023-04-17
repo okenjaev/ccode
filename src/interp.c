@@ -1,6 +1,6 @@
 #include "interp.h"
 
-#include <python3.10/Python.h>
+#include <Python.h>
 
 #include "sys.h"
 #include "buffer.h"
