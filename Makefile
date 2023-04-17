@@ -2,8 +2,8 @@ TARGET = 4me
 
 CC = gcc
 
-CFLAGS = $(shell python3-config --cflags) -I$(INCLUDE_DIR) -Wall -g -fsanitize=address
-LFLAGS = $(shell python3-config --ldflags --embed) -fsanitize=address
+CFLAGS = $(shell python3-config --cflags) -I$(INCLUDE_DIR) -Wall -g #-fsanitize=address
+LFLAGS = $(shell python3-config --ldflags --embed) #-fsanitize=address
 
 SRC_DIR = src
 BUILD_DIR = bin

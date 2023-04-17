@@ -9,7 +9,7 @@ struct darray_info
 
 fchar*
 nc_darray_init(fuint32 elem_size, fuint32 cap) {		
-    char* arr = malloc(sizeof(struct darray_info) +	
+    fchar* arr = malloc(sizeof(struct darray_info) +	
 		 elem_size * cap);		
     arr += sizeof(struct darray_info);
     *(nc_darray_size(arr)) = 0;
@@ -19,21 +19,21 @@ nc_darray_init(fuint32 elem_size, fuint32 cap) {
 }
 
 void
-nc_darray_ensure_cap(char* arr)
+nc_darray_ensure_cap(char** arr)
 {
-    fuint32* size = nc_darray_size(arr);
-    fuint32* cap = nc_darray_cap(arr);
-    fuint32* es = nc_darray_es(arr);
-    
+    fuint32* size = nc_darray_size(*arr);
+    fuint32* cap = nc_darray_cap(*arr);
+    fuint32* es = nc_darray_es(*arr);
+
     if (*cap == *size - 1)
     {
 	fuint32 desired_size = *cap * 2;
 	
-	char* temp = realloc(arr, sizeof(struct darray_info) +
+	fchar* temp = realloc(arr, sizeof(struct darray_info) +
 			     *es * desired_size);
 	if (temp)
 	{
-	    arr = temp;
+	    *arr = temp;
 	    *cap = desired_size;
 	}
     }
