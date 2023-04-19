@@ -14,19 +14,12 @@ static darray(int) hotkeys;
 void
 input_init(void)
 {
-    hotkeys = darray_init(int, 5);
+    hotkeys = darray_init(int, 1);
 }
 
 void
 input_add_hotkey(fchar* key, void* call_back)
 {
-    darray_append(hotkeys, 0);
-    darray_append(hotkeys, 1);
-    darray_append(hotkeys, 2);
-    darray_append(hotkeys, 3);
-    darray_append(hotkeys, 4);
-    darray_append(hotkeys, 5);
-    darray_append(hotkeys, 6);
 }
 
 void
@@ -49,7 +42,18 @@ input_update(void)
 
     if (c == 'x')
     {
-	sm_set_message("%u %d", darray_size(hotkeys), hotkeys[8]);
+	sm_set_message("size:%u cap:%u es:%u i:%d", darray_size(hotkeys), *nc_darray_cap((char*) hotkeys), *nc_darray_es((char*) hotkeys), hotkeys[1]);
+    }
+
+    if (c == 'o')
+    {
+	darray_append(hotkeys, 7);
+	darray_append(hotkeys, 8);
+	darray_append(hotkeys, 9);
+	darray_append(hotkeys, 10);
+	darray_append(hotkeys, 11);
+	sm_set_message("cap: %u", *nc_darray_cap((char*) hotkeys));
+
     }
 }
 

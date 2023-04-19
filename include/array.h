@@ -10,14 +10,14 @@
 
 #define darray_append(x, y)				\
     {							\
-        nc_darray_ensure_cap((char *) x);		\
+        nc_darray_ensure_cap((char **) &x);		\
 	fuint32 *size = nc_darray_size((char*) x);	\
 	x[*size] = y;					\
 	*size += 1;					\
     }							\
 
 void
-nc_darray_ensure_cap(char* arr);
+nc_darray_ensure_cap(char** arr);
 
 fchar*
 nc_darray_init(fuint32 elem_size, fuint32 cap);    

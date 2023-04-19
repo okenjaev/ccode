@@ -1,17 +1,42 @@
-dsdfldjdjafljdal
-asdjfkjadsf;
-adjkfjadlfj;
-adjfljsda;fjdasf
-lkaksdjf;kasdjf;
-jsdafjds;afj;dsa
-kajdf;ja;fjd;ajf;dlsjalkf;jdsalkjdfk;lasjf
+In c there is no container like C++ vector
 
-Lorem ipsum dolor sit amet, 
-consectetur adipiscing elit. 
-Nam pretium dolor lectus, eu 
-ullamcorper nibh imperdiet non. dlafjdlkajfdlsajfdlkajfdlkajf;dajf;djaf;dja;f
+Array:
 
-Suspendisse finibus scelerisque 
-dakfjdlkafkldhakj hdajk hdjkhda dhajk dh jkhdak hdla hdal fjdha lkdha lhd jfdhal dhf lhdaflkjhda kfhdkjla hfdljk fhdjkahf dkjahfdjk ahfdljka hfda
-adfjkahdfj hdasjf khdakf hdasjksfh fjkdh fjdh fdjh flkdahfdlakshf kdjh fjah djahf dkalshfiwqueryqwefhdkka cnzbcvmnfjadshfqwiueryqoqfd a
-adhfjadh fkas hfdksfhdkajrduiqrye qoryewqo ryeuwiqryewqiryqoer 
+int num[3];
+
+Stack;
+
+1 byte = 8 bit (x86) (arm emas)
+1 word = 16 bit (x86) (arm emas)
+
+int bu 32 bit
+32 / 8 = 4 byte
+sizeof(int) = 4
+
+Stackda:
+
+3 * sizeof(int) = 3 * 4 = 12 byte
+
+[0000000 xxxxyyyyzzzz 00000]
+
+Dynamic Array:
+
+int* num = malloc(3 * sizeof(int));
+
+HEAPDA
+
+int* temp = realloc(num, 7 * sizeof(int));
+if (temp)
+{
+   num = temp;
+}
+---------------------
+
+HEADER
+
+size: 4 byte | 2 integers 
+capacity : 4 byte | 4 integer 
+element_size : 4 byte | sizeof(int) 4 byte
+
+[0000 size|capacity|element_size.000011112222333
+
