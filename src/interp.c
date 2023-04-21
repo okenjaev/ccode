@@ -7,8 +7,6 @@
 #include "editor.h"
 #include "input.h"
 
-static fint32 numargs=0;
-
 static PyObject*
 insert(PyObject *self, PyObject *args)
 {
@@ -153,8 +151,6 @@ PyInit_fme(void)
     return PyModule_Create(&fme_module);
 }
 
-static wchar_t *program;
-
 void
 interp_init(char* argv[])
 {
@@ -165,51 +161,43 @@ interp_init(char* argv[])
 	return;
     }
 
-    program = Py_DecodeLocale(argv[0], NULL);
-    if (program == NULL)
-    {
-	die("py program exited");
-    }
-
     if (PyImport_AppendInittab("fme", &PyInit_fme) == -1 )
     {
 	fprintf(stderr, "Error: could not fme\n");
 	die("Error");
     }
-    
-    Py_SetProgramName(program);
-    Py_Initialize();
 
-    PyObject *pmodule = PyImport_ImportModule("fme");
-    if (!pmodule) {
-        PyErr_Print();
-        fprintf(stderr, "Error: could not import module fme");
+    PyConfig config;
+    PyConfig_InitPythonConfig(&config);
+    config.isolated = 1;
+
+    PyStatus status = Py_InitializeFromConfig(&config);
+    PyConfig_Clear(&config);
+    if (PyStatus_Exception(status))
+    {
+	return;
     }
-    
+
     PyRun_SimpleFile(fp, "py/init.py");
     fclose(fp);
 }
 
-
 void
 interp_deinit(void)
 {
-    if (program)
+    // TODO: research on finalize
+    // https://docs.python.org/3/c-api/init_config.html
+    
+    if (Py_FinalizeEx() < 0)
     {
-	if (Py_FinalizeEx() < 0)
-	{
-	    die("py finalize ex");
-	}
-
-	PyMem_RawFree(program);
+	die("py finalize ex");
     }
 }
 
 void
 interp_call(void* func)
 {
-    PyObject *result;
-    result = PyObject_CallObject(func, NULL);
+    PyObject_CallObject(func, NULL);
 }
 
 void
