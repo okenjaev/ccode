@@ -2,8 +2,8 @@ TARGET = 4me
 
 CC = gcc
 
-PYTHON_CFLAGS := $(shell python3-config --cflags)
-PYTHON_LFLAGS := $(shell python3-config --ldflags --embed)
+PYTHON_CFLAGS := $(shell python-config --cflags)
+PYTHON_LFLAGS := $(shell python-config --ldflags --embed)
 
 CFLAGS = -I$(INCLUDE_DIR) -Wall -g -fsanitize=address
 LFLAGS = $(PYTHON_LFLAGS) -fsanitize=address

@@ -6,7 +6,7 @@
 #include "common.h"
 
 void
-interp_init(char* argv[]);
+interp_init(void);
 
 void
 interp_deinit(void);

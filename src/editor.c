@@ -17,9 +17,9 @@ editor_init(char* argv[])
     get_window_size();
     config.screenrows -= 2;
 
+    buffer_init();
     input_init();
-
-    interp_init(argv);
+    interp_init();
 }
 
 void

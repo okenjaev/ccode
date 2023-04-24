@@ -122,7 +122,8 @@ set_kbd(PyObject* self, PyObject* args)
 	PyErr_SetString(PyExc_TypeError, "parameter must be callable");
 	return NULL;
     }
-    Py_XINCREF(call_back);
+    
+    /* Py_XINCREF(call_back); */
     input_add_hotkey("cx", call_back);
     return Py_None;
 }
@@ -152,7 +153,7 @@ PyInit_fme(void)
 }
 
 void
-interp_init(char* argv[])
+interp_init(void)
 {
     FILE *fp = fopen("py/init.py", "r");
 
@@ -173,17 +174,21 @@ interp_init(char* argv[])
 
     PyStatus status = Py_InitializeFromConfig(&config);
     PyConfig_Clear(&config);
+
     if (PyStatus_Exception(status))
     {
+	Py_ExitStatusException(status);
+	fclose(fp);
 	return;
     }
 
     PyRun_SimpleFile(fp, "py/init.py");
+
     fclose(fp);
 }
 
 void
-interp_deinit(void)
+interp_deinit()
 {
     // TODO: research on finalize
     // https://docs.python.org/3/c-api/init_config.html

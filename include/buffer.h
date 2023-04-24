@@ -2,30 +2,33 @@
 #define BUFFER_H
 
 #include "common.h"
+#include "array.h"
 
 struct row;
 
-
 struct cur_pos {
-    fint32 x;
-    fint32 y;
-    fint32 r;
-    fint32 rowoff;
-    fint32 coloff;
+    fuint32 x;
+    fuint32 y;
+    fuint32 r;
+    fuint32 rowoff;
+    fuint32 coloff;
 };
 
 struct buffer
 {
     struct cur_pos cp;
-    fint32 dirty;
-    fint32 num_rows;
     fchar* file_name;
-    struct row *row;
+    darray(struct row) rows;
+
+    fint32 dirty;
 };
 
 
 struct buffer*
 buffer_current(void);
+
+void
+buffer_init(void);
 
 void
 buffer_deinit(struct buffer);
@@ -34,10 +37,10 @@ struct str_buf
 buffer_serialize(void);
 
 void
-buffer_append_row(fint32, struct str_buf);
+buffer_append_row(fuint32, struct str_buf);
 
 void
-buffer_delete_row(fint32);
+buffer_delete_row(fuint32);
 
 void
 buffer_update(void);

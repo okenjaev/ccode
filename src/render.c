@@ -25,7 +25,7 @@ render_draw_status_bar(const struct buffer* buffer, struct str_buf* renderb)
 
     fchar status[80], rstatus[80];
     fint32 len = snprintf(status, sizeof(status), "%.20s %s", buffer->file_name ? buffer->file_name : "[empty]", buffer->dirty ? "(modified)" : "");
-    fint32 rlen = snprintf(rstatus, sizeof(rstatus), "%d/%d", buffer->cp.y + 1, buffer->num_rows);
+    fint32 rlen = snprintf(rstatus, sizeof(rstatus), "%d/%d", buffer->cp.y + 1, darray_size(buffer->rows));
     
     if (len > config.screencols)
     {
@@ -73,8 +73,8 @@ render_draw_rows(const struct buffer* buffer, struct str_buf* renderb)
     for(fint32 y=0; y<config.screenrows; y++)
     {
 	fint32 filerow = y + buffer->cp.rowoff;
-	if (filerow >= buffer->num_rows) {
-	    if (buffer->num_rows == 0 && y == config.screenrows / 3)
+	if (filerow >= darray_size(buffer->rows)) {
+	    if (darray_size(buffer->rows) == 0 && y == config.screenrows / 3)
 	    {
 		fchar welcome[80];
 		fint32 welcomelen = snprintf(welcome, sizeof(welcome),
@@ -103,7 +103,7 @@ render_draw_rows(const struct buffer* buffer, struct str_buf* renderb)
 	}
 	else
 	{
-	    struct row *row = buffer->row + filerow;
+	    struct row *row = buffer->rows + filerow;
 	    fint32 len = row->render_fchars.size - buffer->cp.coloff;
 	    if (len < 0)
 	    {
