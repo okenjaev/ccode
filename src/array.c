@@ -20,6 +20,16 @@ nc_darray_init(fuint32 elem_size, fuint32 cap) {
 }
 
 void
+nc_darray_remove(char* arr, fuint32 index)
+{
+    fuint32 *size = nc_darray_size(arr);
+    fuint32 *es = nc_darray_es(arr);
+
+    memmove(arr + index * *es, arr + (index + 1) * *es, *size - (index + 1) * *es);
+    *size-=1;
+}
+
+void
 nc_darray_ensure_cap(char** arr)
 {
     fuint32* size = nc_darray_size(*arr);

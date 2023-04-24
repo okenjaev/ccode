@@ -7,6 +7,7 @@
 #define darray_init(es, cp) (es*)nc_darray_init(sizeof(es), cp)
 #define darray_free(x) nc_darray_free((char*)x)
 #define darray_size(x) *nc_darray_size((char*)x)
+#define darray_remove(x, y) nc_darray_remove((char*)x, y)
 
 #define darray_append(x, y)				\
     {							\
@@ -18,6 +19,9 @@
 
 void
 nc_darray_ensure_cap(char** arr);
+
+void
+nc_darray_remove(char* arr, fuint32 index);
 
 fchar*
 nc_darray_init(fuint32 elem_size, fuint32 cap);    
